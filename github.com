@@ -1,5 +1,5 @@
 xaat@riseup.net
-cxHL2CDQAXgNXQKvXCY6ryekHyePEGp34p8Usvmo2R3nJkGR
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xaatt
 
 echo "# site" >> README.md
