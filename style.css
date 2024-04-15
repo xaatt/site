@@ -17,33 +17,13 @@ body {
     text-align: left;
     margin-right: 20px; /* Добавляем небольшой отступ между основным контентом и боковой панелью */
 }
-.sidebar {
-    width: 25%; /* Ширина боковой панели */
-    background-color: black; /* Черный цвет фона боковой панели */
-    padding: 20px;
-}
+
 h1 {
     font-size: 2.5em;
     margin-bottom: 20px;
 }
+
 p {
     font-size: 1.2em;
     line-height: 1.6;
-}
-
-/* Медиа-запрос для мобильных устройств */
-@media screen and (max-width: 768px) {
-    .container {
-        flex-direction: column; /* Меняем направление flexbox на столбец */
-    }
-    .main-content,
-    .sidebar {
-        width: 100%; /* Обе части занимают всю доступную ширину */
-        margin-right: 0; /* Убираем отступ у основного контента */
-    }
-    
-    img {
-    border: 0; /* Убираем рамку у изображений */
-}
-
 }
