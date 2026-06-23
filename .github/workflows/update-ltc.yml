@@ -12,48 +12,191 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Update Price Page
+    - name: Run Update and Generate No-JS Chart (Go)
       run: |
-        PRICE=$(curl -s "https://api.coinbase.com/v2/prices/LTC-USD/spot" | grep -o '"amount":"[^"]*"' | cut -d'"' -f4)
-        
-        if [ -z "$PRICE" ]; then
-          echo "API Error"
-          exit 1
-        fi
-        
-        cat << 'EOF' > ltc.html
-        <!DOCTYPE html>
+        cat << 'EOF' > main.go
+        package main
+
+        import (
+        	"encoding/json"
+        	"fmt"
+        	"io"
+        	"net/http"
+        	"os"
+        	"strconv"
+        	"strings"
+        	"time"
+        )
+
+        type CoinbaseResponse struct {
+        	Data struct {
+        		Amount string `json:"amount"`
+        	} `json:"data"`
+        }
+
+        type Point struct {
+        	Timestamp string
+        	Price     float64
+        }
+
+        func main() {
+        	// 1. Получаем текущую цену с Coinbase
+        	resp, err := http.Get("https://api.coinbase.com/v2/prices/LTC-USD/spot")
+        	if err != nil {
+        		fmt.Println("HTTP Error:", err)
+        		os.Exit(1)
+        	}
+        	defer resp.Body.Close()
+
+        	body, _ := io.ReadAll(resp.Body)
+        	var cbResp CoinbaseResponse
+        	if err := json.Unmarshal(body, &cbResp); err != nil {
+        		fmt.Println("JSON Error:", err)
+        		os.Exit(1)
+        	}
+
+        	price, err := strconv.ParseFloat(cbResp.Data.Amount, 64)
+        	if err != nil {
+        		fmt.Println("Parse Error:", err)
+        		os.Exit(1)
+        	}
+
+        	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
+
+        	// 2. Записываем точку в историю
+        	historyFile := "history.csv"
+        	var fileExists bool
+        	if _, err := os.Stat(historyFile); err == nil {
+        		fileExists = true
+        	}
+
+        	f, err := os.OpenFile(historyFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+        	if err != nil {
+        		fmt.Println("File Open Error:", err)
+        		os.Exit(1)
+        	}
+        	if !fileExists {
+        		f.WriteString("timestamp,price\n")
+        	}
+        	f.WriteString(fmt.Sprintf("%s,%.2f\n", nowStr, price))
+        	f.Close()
+
+        	// 3. Читаем историю (берем последние 24 записи)
+        	data, err := os.ReadFile(historyFile)
+        	if err != nil {
+        		fmt.Println("File Read Error:", err)
+        		os.Exit(1)
+        	}
+
+        	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+        	if len(lines) > 1 {
+        		lines = lines[1:] // пропускаем заголовок
+        	}
+
+        	start := len(lines) - 24
+        	if start < 0 {
+        		start = 0
+        	}
+        	lastLines := lines[start:]
+
+        	var lastPoints []Point
+        	for _, line := range lastLines {
+        		parts := strings.Split(line, ",")
+        		if len(parts) == 2 {
+        			p, _ := strconv.ParseFloat(parts[1], 64)
+        			lastPoints = append(lastPoints, Point{Timestamp: parts[0], Price: p})
+        		}
+        	}
+
+        	// 4. Строим SVG-график программно
+        	svgWidth := 500
+        	svgHeight := 180
+        	var svgHTML string
+
+        	if len(lastPoints) > 1 {
+        		minP := lastPoints[0].Price
+        		maxP := lastPoints[0].Price
+        		for _, pt := range lastPoints {
+        			if pt.Price < minP {
+        				minP = pt.Price
+        			}
+        			if pt.Price > maxP {
+        				maxP = pt.Price
+        			}
+        		}
+
+        		rng := maxP - minP
+        		if rng == 0 {
+        			rng = 1.0
+        		}
+
+        		var pointsCoords []string
+        		var circlesHTML []string
+
+        		for i, pt := range lastPoints {
+        			x := (float64(i) / float64(len(lastPoints)-1)) * float64(svgWidth-60) + 30
+        			y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-60) + 30)
+        			pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
+        			circlesHTML = append(circlesHTML, fmt.Sprintf(`<circle cx="%.2f" cy="%.2f" r="4" fill="#2c3e50"/>`, x, y))
+        		}
+
+        		pointsStr := strings.Join(pointsCoords, " ")
+        		circlesStr := strings.Join(circlesHTML, "\n")
+
+        		svgHTML = fmt.Sprintf(`
+        		<svg viewBox="0 0 %d %d" class="chart">
+        			<text x="10" y="25" fill="#bdc3c7" font-size="10">$%.2f</text>
+        			<line x1="30" y1="20" x2="%d" y2="20" stroke="#f1f2f6" stroke-dasharray="4"/>
+        			
+        			<text x="10" y="%d" fill="#bdc3c7" font-size="10">$%.2f</text>
+        			<line x1="30" y1="%d" x2="%d" y2="%d" stroke="#f1f2f6" stroke-dasharray="4"/>
+        			
+        			<polyline fill="none" stroke="#3498db" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
+        			%s
+        		</svg>`, svgWidth, svgHeight, maxP, svgWidth-10, svgHeight-15, minP, svgHeight-20, svgWidth-10, svgHeight-20, pointsStr, circlesStr)
+        	} else {
+        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px;'>Собираем точки для графика (нужно хотя бы 2 запуска)...</div>"
+        	}
+
+        	// 5. Генерируем финальный HTML (без JS)
+        	htmlContent := fmt.Sprintf(`<!DOCTYPE html>
         <html lang="ru">
         <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Курс Litecoin (LTC)</title>
-            <style>
-                body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
-                h1 { font-size: 20px; color: #666; margin: 0 0 10px 0; }
-                .price { font-size: 48px; font-weight: bold; color: #2c3e50; }
-                .currency { font-size: 24px; color: #7f8c8d; }
-                .date { font-size: 12px; color: #bdc3c7; margin-top: 20px; }
-            </style>
+        	<meta charset="UTF-8">
+        	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        	<title>Курс Litecoin (LTC)</title>
+        	<style>
+        		body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        		.container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; max-width: 550px; width: 100%%; }
+        		h1 { font-size: 18px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        		.price { font-size: 54px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
+        		.currency { font-size: 24px; color: #95a5a6; font-weight: normal; }
+        		.chart { width: 100%%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }
+        		.date { font-size: 11px; color: #bdc3c7; margin-top: 25px; }
+        	</style>
         </head>
         <body>
-            <div class="container">
-                <h1>Текущая цена Litecoin (LTC)</h1>
-                <div class="price">_PRICE_ <span class="currency">USD</span></div>
-                <div class="date">Последнее обновление: _DATE_ UTC</div>
-            </div>
+        	<div class="container">
+        		<h1>Курс Litecoin (LTC)</h1>
+        		<div class="price">$%.2f <span class="currency">USD</span></div>
+        		%s
+        		<div class="date">Последнее обновление: %s UTC</div>
+        	</div>
         </body>
-        </html>
+        </html>`, price, svgHTML, nowStr)
+
+        	os.WriteFile("ltc.html", []byte(htmlContent), 0644)
+        }
         EOF
         
-        sed -i "s/_PRICE_/\$$PRICE/g" ltc.html
-        sed -i "s/_DATE_/$(date -u '+%Y-%m-%d %H:%M:%S')/g" ltc.html
+        # Запускаем Go-скрипт и удаляем исходник
+        go run main.go
+        rm main.go
 
     - name: Push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add ltc.html
-        git diff-index --quiet HEAD || git commit -m "Автоматическое обновление курса LTC"
+        git add ltc.html history.csv
+        git diff-index --quiet HEAD || git commit -m "Обновление курса и No-JS графика на Golang"
         git push
