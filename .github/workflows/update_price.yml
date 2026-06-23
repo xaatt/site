@@ -12,41 +12,43 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Get Price and Generate HTML
+    - name: Get Price from Coinbase
       run: |
-        # Запрос к надежному API Coinbase
         PRICE=$(curl -s "https://api.coinbase.com/v2/prices/LTC-USD/spot" | grep -o '"amount":"[0-9.]*"' | cut -d':' -f2 | tr -d '"')
-        
         if [ -z "$PRICE" ] || [ "$PRICE" = "null" ]; then
           echo "API Error"
           exit 1
         fi
-        
-        cat <<EOF > ltc.html
-        <!DOCTYPE html>
-        <html lang="ru">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Курс Litecoin (LTC)</title>
-            <style>
-                body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
-                h1 { font-size: 20px; color: #666; margin: 0 0 10px 0; }
-                .price { font-size: 48px; font-weight: bold; color: #2c3e50; }
-                .currency { font-size: 24px; color: #7f8c8d; }
-                .date { font-size: 12px; color: #bdc3c7; margin-top: 20px; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>Текущая цена Litecoin (LTC)</h1>
-                <div class="price">\$$PRICE <span class="currency">USD</span></div>
-                <div class="date">Последнее обновление: $(date -u '+%Y-%m-%d %H:%M:%S') UTC</div>
-            </div>
-        </body>
-        </html>
-        EOF
+        echo "LTC_PRICE=$PRICE" >> $GITHUB_ENV
+        echo "LAST_UPDATE=$(date -u '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+
+    - name: Generate HTML File
+      env:
+        HTML_CONTENT: |
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Курс Litecoin (LTC)</title>
+              <style>
+                  body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                  .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
+                  h1 { font-size: 20px; color: #666; margin: 0 0 10px 0; }
+                  .price { font-size: 48px; font-weight: bold; color: #2c3e50; }
+                  .currency { font-size: 24px; color: #7f8c8d; }
+                  .date { font-size: 12px; color: #bdc3c7; margin-top: 20px; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>Текущая цена Litecoin (LTC)</h1>
+                  <div class="price">$${{ env.LTC_PRICE }} <span class="currency">USD</span></div>
+                  <div class="date">Последнее обновление: ${{ env.LAST_UPDATE }} UTC</div>
+              </div>
+          </body>
+          </html>
+      run: printenv HTML_CONTENT > ltc.html
 
     - name: Push changes
       run: |
