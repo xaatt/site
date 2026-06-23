@@ -14,11 +14,14 @@ jobs:
 
     - name: Get Price and Generate HTML
       run: |
-        PRICE=$(curl -s "https://api.coingecko.com/api/v3/simple/price?ids=litecoin&vs_currencies=usd" | grep -o '"usd":[0-9.]*' | cut -d: -f2)
+        # Запрос к надежному API Coinbase
+        PRICE=$(curl -s "https://api.coinbase.com/v2/prices/LTC-USD/spot" | grep -o '"amount":"[0-9.]*"' | cut -d':' -f2 | tr -d '"')
+        
         if [ -z "$PRICE" ] || [ "$PRICE" = "null" ]; then
           echo "API Error"
           exit 1
         fi
+        
         cat <<EOF > ltc.html
         <!DOCTYPE html>
         <html lang="ru">
