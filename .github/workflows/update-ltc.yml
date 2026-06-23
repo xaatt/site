@@ -1,41 +1,59 @@
 name: Update Litecoin Price
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'
-
-permissions:
-  contents: write
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Install tools
-        run: sudo apt-get update && sudo apt-get install -y jq curl
+    - name: Update Price Page
+      run: |
+        PRICE=$(curl -s "https://api.coinbase.com/v2/prices/LTC-USD/spot" | grep -o '"amount":"[^"]*"' | cut -d'"' -f4)
+        
+        if [ -z "$PRICE" ]; then
+          echo "API Error"
+          exit 1
+        fi
+        
+        cat << 'EOF' > ltc.html
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Курс Litecoin (LTC)</title>
+            <style>
+                body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
+                h1 { font-size: 20px; color: #666; margin: 0 0 10px 0; }
+                .price { font-size: 48px; font-weight: bold; color: #2c3e50; }
+                .currency { font-size: 24px; color: #7f8c8d; }
+                .date { font-size: 12px; color: #bdc3c7; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Текущая цена Litecoin (LTC)</h1>
+                <div class="price">_PRICE_ <span class="currency">USD</span></div>
+                <div class="date">Последнее обновление: _DATE_ UTC</div>
+            </div>
+        </body>
+        </html>
+        EOF
+        
+        sed -i "s/_PRICE_/\$$PRICE/g" ltc.html
+        sed -i "s/_DATE_/$(date -u '+%Y-%m-%d %H:%M:%S')/g" ltc.html
 
-      - name: Get price
-        run: |
-          PRICE=$(curl -s "https://api.coingecko.com/api/v3/simple/price?ids=litecoin&vs_currencies=usd" | jq -r '.litecoin.usd')
-          UPDATED=$(date -u '+%Y-%m-%d %H:%M UTC')
-
-          sed \
-            -e "s/{{PRICE}}/$PRICE/g" \
-            -e "s/{{UPDATED}}/$UPDATED/g" \
-            template-ltc.html > ltc.html
-
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          git add ltc.html
-
-          if ! git diff --cached --quiet; then
-            git commit -m "Update LTC price"
-            git push
-          fi
+    - name: Push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add ltc.html
+        git diff-index --quiet HEAD || git commit -m "Автоматическое обновление курса LTC"
+        git push
