@@ -1,9 +1,9 @@
 name: Update Litecoin Price
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 * * * *'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -33,5 +33,7 @@ jobs:
 
           git add ltc.html
 
-          git diff --cached --quiet || \
-          (git commit -m "Update LTC price" && git push)
+          if ! git diff --cached --quiet; then
+            git commit -m "Update LTC price"
+            git push
+          fi
