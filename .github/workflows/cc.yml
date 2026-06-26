@@ -168,11 +168,16 @@ jobs:
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
 
-        	// Return structured HTML table row
+        	// Return structured HTML table row with flex wrapper for clean layout
         	return fmt.Sprintf(`
         	<tr>
         		<td class="pair-cell"><b>%s</b></td>
-        		<td class="price-cell"><span class="currency">%s</span><b>%s</b></td>
+        		<td class="price-cell">
+        			<div class="crypto-price">
+        				<span class="currency">%s</span>
+        				<span class="digits">%s</span>
+        			</div>
+        		</td>
         		<td class="change-cell"><span class="trend badge-%s">%s</span></td>
         		<td class="chart-cell">%s</td>
         		<td class="chart-cell">%s</td>
@@ -203,8 +208,10 @@ jobs:
         		"tr:last-child td { border-bottom: none; }\n" +
         		"tr:hover td { background: #fcfdfe; }\n" +
         		".pair-cell { color: #1e2329; font-size: 16px; }\n" +
-        		".price-cell { color: #1e2329; white-space: nowrap; font-size: 16px; line-height: 1.2; }\n" +
-        		".currency { color: #707a8a; font-size: 11px; font-weight: 600; position: relative; top: -4px; margin-right: 1px; font-family: sans-serif; }\n" +
+        		".price-cell { white-space: nowrap; }\n" +
+        		".crypto-price { display: inline-flex; align-items: flex-start; line-height: 1; }\n" +
+        		".digits { color: #1e2329; font-size: 16px; font-weight: bold; }\n" +
+        		".currency { color: #707a8a; font-size: 11px; font-weight: 500; margin-right: 2px; padding-top: 1px; font-family: sans-serif; }\n" +
         		".trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }\n" +
         		".badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }\n" +
         		".badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }\n" +
