@@ -188,11 +188,11 @@ jobs:
         	btcLtcPrice, _ := getPrice("BTC-LTC")
         	ltcBtcPrice, _ := getPrice("LTC-BTC")
 
-        	// 1. Generate table rows STRICTLY in requested order
-        	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "USD", 2, btcUSDPrice, nowStr)
-        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcUSDPrice, nowStr)
-        	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
-        	ltcBtcRow := processCoinRow("LTC / BTC", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
+        	// 1. Generate table rows STRICTLY in requested order with updated graphics symbols
+        	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "$", 2, btcUSDPrice, nowStr)
+        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "$", 2, ltcUSDPrice, nowStr)
+        	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "Ł", 2, btcLtcPrice, nowStr)
+        	ltcBtcRow := processCoinRow("LTC / BTC", "history_ltc_btc.csv", "#2ecc71", "₿", 6, ltcBtcPrice, nowStr)
 
         	// 2. Save professional compact table styles to external cc.css file
         	cssContent := "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #212529; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box; }\n" +
@@ -205,7 +205,7 @@ jobs:
         		"tr:hover td { background: #fcfdfe; }\n" +
         		".pair-cell { color: #1e2329; font-size: 16px; }\n" +
         		".price-cell { color: #1e2329; white-space: nowrap; }\n" +
-        		".currency { color: #848e9c; font-size: 13px; font-weight: normal; margin-left: 4px; }\n" +
+        		".currency { color: #848e9c; font-size: 14px; font-weight: 500; margin-left: 4px; }\n" +
         		".trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }\n" +
         		".badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }\n" +
         		".badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }\n" +
