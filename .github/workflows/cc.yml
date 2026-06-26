@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate No-JS Chart (Go)
+    - name: Run Update and Generate No-JS Crypto Dashboard (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -39,53 +39,44 @@ jobs:
         	Price     float64
         }
 
-        func main() {
-        	// 1. Получаем текущую цену с Coinbase
-        	resp, err := http.Get("https://api.coinbase.com/v2/prices/LTC-USD/spot")
+        // Функция получения цены с Coinbase
+        func getPrice(symbol string) (float64, error) {
+        	resp, err := http.Get(fmt.Sprintf("https://api.coinbase.com/v2/prices/%s-USD/spot", symbol))
         	if err != nil {
-        		fmt.Println("HTTP Error:", err)
-        		os.Exit(1)
+        		return 0, err
         	}
         	defer resp.Body.Close()
 
         	body, _ := io.ReadAll(resp.Body)
         	var cbResp CoinbaseResponse
         	if err := json.Unmarshal(body, &cbResp); err != nil {
-        		fmt.Println("JSON Error:", err)
-        		os.Exit(1)
+        		return 0, err
         	}
 
-        	price, err := strconv.ParseFloat(cbResp.Data.Amount, 64)
-        	if err != nil {
-        		fmt.Println("Parse Error:", err)
-        		os.Exit(1)
-        	}
+        	return strconv.ParseFloat(cbResp.Data.Amount, 64)
+        }
 
-        	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
-
-        	// 2. Записываем точку в историю
-        	historyFile := "history.csv"
+        // Модульная функция обработки монеты и генерации её SVG-карточки
+        func processCoin(symbol, historyFile, strokeColor string, price float64, nowStr string) string {
+        	// 1. Записываем точку в историю
         	var fileExists bool
         	if _, err := os.Stat(historyFile); err == nil {
         		fileExists = true
         	}
 
         	f, err := os.OpenFile(historyFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-        	if err != nil {
-        		fmt.Println("File Open Error:", err)
-        		os.Exit(1)
+        	if err == nil {
+        		if !fileExists {
+        			f.WriteString("timestamp,price\n")
+        		}
+        		f.WriteString(fmt.Sprintf("%s,%.2f\n", nowStr, price))
+        		f.Close()
         	}
-        	if !fileExists {
-        		f.WriteString("timestamp,price\n")
-        	}
-        	f.WriteString(fmt.Sprintf("%s,%.2f\n", nowStr, price))
-        	f.Close()
 
-        	// 3. Читаем историю (берем последние 24 записи)
+        	// 2. Читаем историю
         	data, err := os.ReadFile(historyFile)
         	if err != nil {
-        		fmt.Println("File Read Error:", err)
-        		os.Exit(1)
+        		return "<div class='card'>Ошибка чтения данных</div>"
         	}
 
         	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
@@ -108,7 +99,7 @@ jobs:
         		}
         	}
 
-        	// 4. Строим SVG-график программно
+        	// 3. Строим SVG график внутри карточки
         	svgWidth := 500
         	svgHeight := 180
         	var svgHTML string
@@ -151,39 +142,68 @@ jobs:
         			<text x="10" y="%d" fill="#bdc3c7" font-size="10">$%.2f</text>
         			<line x1="30" y1="%d" x2="%d" y2="%d" stroke="#f1f2f6" stroke-dasharray="4"/>
         			
-        			<polyline fill="none" stroke="#3498db" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
+        			<polyline fill="none" stroke="%s" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
         			%s
-        		</svg>`, svgWidth, svgHeight, maxP, svgWidth-10, svgHeight-15, minP, svgHeight-20, svgWidth-10, svgHeight-20, pointsStr, circlesStr)
+        		</svg>`, svgWidth, svgHeight, maxP, svgWidth-10, svgHeight-15, minP, svgHeight-20, svgWidth-10, svgHeight-20, strokeColor, pointsStr, circlesStr)
         	} else {
-        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px;'>Собираем точки для графика...</div>"
+        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px; height:120px; display:flex; align-items:center; justify-content:center;'>Собираем точки для графика...</div>"
         	}
 
-        	// 5. Генерируем финальный HTML (без JS)
+        	// Возвращаем собранную HTML-карточку для монеты
+        	return fmt.Sprintf(`
+        	<div class="card">
+        		<h1>Курс %s</h1>
+        		<div class="price">$%.2f <span class="currency">USD</span></div>
+        		%s
+        	</div>`, symbol, price, svgHTML)
+        }
+
+        func main() {
+        	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
+
+        	// Получаем цены для обеих монет
+        	ltcPrice, err := getPrice("LTC")
+        	if err != nil {
+        		fmt.Println("LTC Error:", err)
+        		os.Exit(1)
+        	}
+
+        	btcPrice, err := getPrice("BTC")
+        	if err != nil {
+        		fmt.Println("BTC Error:", err)
+        		os.Exit(1)
+        	}
+
+        	// Генерируем карточки (теперь с красивыми именами файлов)
+        	ltcCard := processCoin("Litecoin (LTC)", "history_ltc.csv", "#3498db", ltcPrice, nowStr)
+        	btcCard := processCoin("Bitcoin (BTC)", "history_btc.csv", "#f39c12", btcPrice, nowStr)
+
+        	// Собираем всё в единый адаптивный дашборд
         	htmlContent := fmt.Sprintf(`<!DOCTYPE html>
         <html lang="ru">
         <head>
         	<meta charset="UTF-8">
         	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        	<title>Курс Litecoin (LTC)</title>
+        	<title>Крипто Дашборд</title>
         	<style>
-        		body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        		.container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; max-width: 550px; width: 100%%; }
+        		body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; justify-content: center; }
+        		.dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%%; }
+        		.card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }
         		h1 { font-size: 18px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-        		.price { font-size: 54px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
-        		.currency { font-size: 24px; color: #95a5a6; font-weight: normal; }
+        		.price { font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
+        		.currency { font-size: 20px; color: #95a5a6; font-weight: normal; }
         		.chart { width: 100%%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }
-        		.date { font-size: 11px; color: #bdc3c7; margin-top: 25px; }
+        		.date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }
         	</style>
         </head>
         <body>
-        	<div class="container">
-        		<h1>Курс Litecoin (LTC)</h1>
-        		<div class="price">$%.2f <span class="currency">USD</span></div>
+        	<div class="dashboard">
         		%s
-        		<div class="date">Последнее обновление: %s UTC</div>
+        		%s
         	</div>
+        	<div class="date">Последнее обновление: %s UTC</div>
         </body>
-        </html>`, price, svgHTML, nowStr)
+        </html>`, ltcCard, btcCard, nowStr)
 
         	os.WriteFile("cc.html", []byte(htmlContent), 0644)
         }
@@ -196,6 +216,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add cc.html history.csv
-        git diff-index --quiet HEAD || git commit -m "Переименовал страницу в cc.html"
+        git add cc.html history_ltc.csv history_btc.csv
+        git diff-index --quiet HEAD || git commit -m "Обновление курса и графиков"
         git push
