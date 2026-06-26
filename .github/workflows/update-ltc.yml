@@ -155,7 +155,7 @@ jobs:
         			%s
         		</svg>`, svgWidth, svgHeight, maxP, svgWidth-10, svgHeight-15, minP, svgHeight-20, svgWidth-10, svgHeight-20, pointsStr, circlesStr)
         	} else {
-        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px;'>Собираем точки для графика (нужно хотя бы 2 запуска)...</div>"
+        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px;'>Собираем точки для графика...</div>"
         	}
 
         	// 5. Генерируем финальный HTML (без JS)
@@ -185,11 +185,10 @@ jobs:
         </body>
         </html>`, price, svgHTML, nowStr)
 
-        	os.WriteFile("ltc.html", []byte(htmlContent), 0644)
+        	os.WriteFile("cc.html", []byte(htmlContent), 0644)
         }
         EOF
         
-        # Запускаем Go-скрипт и удаляем исходник
         go run main.go
         rm main.go
 
@@ -197,6 +196,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add ltc.html history.csv
-        git diff-index --quiet HEAD || git commit -m "Обновление курса и No-JS графика на Golang"
+        git add cc.html history.csv
+        git diff-index --quiet HEAD || git commit -m "Переименовал страницу в cc.html"
         git push
