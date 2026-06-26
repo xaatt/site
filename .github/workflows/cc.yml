@@ -39,6 +39,7 @@ jobs:
         	Price     float64
         }
 
+        // Get spot price from Coinbase API
         func getPrice(symbol string) (float64, error) {
         	resp, err := http.Get(fmt.Sprintf("https://api.coinbase.com/v2/prices/%s-USD/spot", symbol))
         	if err != nil {
@@ -55,7 +56,9 @@ jobs:
         	return strconv.ParseFloat(cbResp.Data.Amount, 64)
         }
 
+        // Process coin data, log history and generate SVG chart card
         func processCoin(symbol, historyFile, strokeColor string, price float64, nowStr string) string {
+        	// 1. Save current price point to history CSV
         	var fileExists bool
         	if _, err := os.Stat(historyFile); err == nil {
         		fileExists = true
@@ -70,14 +73,15 @@ jobs:
         		f.Close()
         	}
 
+        	// 2. Read price history from CSV
         	data, err := os.ReadFile(historyFile)
         	if err != nil {
-        		return "<div class='card'>Ошибка чтения данных</div>"
+        		return "<div class='card'>Data read error</div>"
         	}
 
         	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
         	if len(lines) > 1 {
-        		lines = lines[1:]
+        		lines = lines[1:] // skip CSV header
         	}
 
         	start := len(lines) - 24
@@ -95,6 +99,7 @@ jobs:
         		}
         	}
 
+        	// 3. Build SVG chart inside the card
         	svgWidth := 500
         	svgHeight := 180
         	var svgHTML string
@@ -141,9 +146,10 @@ jobs:
         			%s
         		</svg>`, svgWidth, svgHeight, maxP, svgWidth-10, svgHeight-15, minP, svgHeight-20, svgWidth-10, svgHeight-20, strokeColor, pointsStr, circlesStr)
         	} else {
-        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px; height:120px; display:flex; align-items:center; justify-content:center;'>Собираем точки для графика...</div>"
+        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px; height:120px; display:flex; align-items:center; justify-content:center;'>Gathering price history...</div>"
         	}
 
+        	// Return completed HTML card block
         	return fmt.Sprintf(`
         	<div class="card">
         		<h1>Курс %s</h1>
@@ -155,6 +161,7 @@ jobs:
         func main() {
         	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
 
+        	// Fetch current market prices
         	ltcPrice, err := getPrice("LTC")
         	if err != nil {
         		fmt.Println("LTC Error:", err)
@@ -167,22 +174,23 @@ jobs:
         		os.Exit(1)
         	}
 
-        	// 1. Создаем отдельный файл cc.css
+        	// 1. Save styles to external cc.css file
         	cssContent := `body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; justify-content: center; }
-.dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%; }
-.card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }
-h1 { font-size: 18px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-.price { font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
-.currency { font-size: 20px; color: #95a5a6; font-weight: normal; }
-.chart { width: 100%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }
-.date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }`
+        .dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }
+        h1 { font-size: 18px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .price { font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
+        .currency { font-size: 20px; color: #95a5a6; font-weight: normal; }
+        .chart { width: 100%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }
+        .date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }`
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
+        	// 2. Generate crypto cards HTML content
         	ltcCard := processCoin("Litecoin (LTC)", "history_ltc.csv", "#3498db", ltcPrice, nowStr)
         	btcCard := processCoin("Bitcoin (BTC)", "history_btc.csv", "#f39c12", btcPrice, nowStr)
 
-        	// 2. Подключаем cc.css в HTML head вместо тега <style>
+        	// 3. Assemble final HTML document linked with cc.css
         	htmlContent := fmt.Sprintf(`<!DOCTYPE html>
         <html lang="ru">
         <head>
