@@ -1,8 +1,17 @@
-body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; justify-content: center; }
-.dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%; }
-.card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }
-h1 { font-size: 14px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-.price { font-size: 32px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; white-space: nowrap; }
-.currency { font-size: 18px; color: #95a5a6; font-weight: normal; }
-.chart { width: 100%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }
-.date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #212529; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box; }
+.table-container { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); max-width: 960px; width: 100%; box-sizing: border-box; border: 1px solid #eff2f5; }
+h2 { font-size: 20px; font-weight: 700; margin: 0 0 20px 0; color: #1e2329; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th { padding: 14px 16px; color: #707a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #eff2f5; }
+td { padding: 16px; border-bottom: 1px solid #eff2f5; font-size: 15px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fcfdfe; }
+.pair-cell { color: #1e2329; font-size: 16px; }
+.price-cell { color: #1e2329; white-space: nowrap; }
+.currency { color: #848e9c; font-size: 13px; font-weight: normal; margin-left: 4px; }
+.trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+.badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }
+.badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }
+.badge-neutral { color: #707a8a; background: #f0f2f5; }
+.sparkline { width: 140px; height: 34px; display: block; }
+.date { font-size: 12px; color: #707a8a; margin-top: 24px; text-align: center; }
