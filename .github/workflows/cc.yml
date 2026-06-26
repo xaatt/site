@@ -57,7 +57,7 @@ jobs:
         }
 
         // Generate an SVG line based on time-series points
-        func generateSVG(points []Point, strokeColor string) string {
+        func generateSVG(points []Point, strokeColor string, withCircles bool) string {
         	if len(points) < 2 {
         		return "<div class='no-data'>No data</div>"
         	}
@@ -76,16 +76,21 @@ jobs:
         	if rng == 0 { rng = 1.0 }
 
         	var pointsCoords []string
+        	var circlesHTML []string
         	for i, pt := range points {
-        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth-6) + 3
-        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-6) + 3)
+        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth-10) + 5
+        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-10) + 5)
         		pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
+        		if withCircles {
+        			circlesHTML = append(circlesHTML, fmt.Sprintf(`<circle cx="%.2f" cy="%.2f" r="1.5" fill="#2c3e50"/>`, x, y))
+        		}
         	}
 
         	return fmt.Sprintf(`
         	<svg viewBox="0 0 %d %d" class="sparkline">
         		<polyline fill="none" stroke="%s" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
-        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "))
+        		%s
+        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "), strings.Join(circlesHTML, "\n"))
         }
 
         // Process asset data, filter points, and return a clean HTML table row
@@ -108,7 +113,7 @@ jobs:
         	// 2. Read history and parse with real time tracking
         	data, err := os.ReadFile(historyFile)
         	if err != nil {
-        		return "<tr><td colspan='4'>Data error</td></tr>"
+        		return "<tr><td colspan='5'>Data error</td></tr>"
         	}
 
         	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
@@ -156,8 +161,9 @@ jobs:
         		}
         	}
 
-        	// 4. Generate SVG 7d sparkline
-        	svg7d := generateSVG(points7d, strokeColor)
+        	// 4. Generate both SVGs
+        	svg24h := generateSVG(points24h, strokeColor, true)
+        	svg7d := generateSVG(points7d, strokeColor, false)
 
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
@@ -169,27 +175,28 @@ jobs:
         		<td class="price-cell"><b>%s</b> <span class="currency">%s</span></td>
         		<td class="change-cell"><span class="trend badge-%s">%s</span></td>
         		<td class="chart-cell">%s</td>
-        	</tr>`, symbol, mainPriceStr, unit, trendClass, changeText, svg7d)
+        		<td class="chart-cell">%s</td>
+        	</tr>`, symbol, mainPriceStr, unit, trendClass, changeText, svg24h, svg7d)
         }
 
         func main() {
         	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
 
         	// Fetch market prices directly from Coinbase API endpoints
-        	ltcUSDPrice, _ := getPrice("LTC-USD")
         	btcUSDPrice, _ := getPrice("BTC-USD")
-        	ltcBtcPrice, _ := getPrice("LTC-BTC")
+        	ltcUSDPrice, _ := getPrice("LTC-USD")
         	btcLtcPrice, _ := getPrice("BTC-LTC")
+        	ltcBtcPrice, _ := getPrice("LTC-BTC")
 
-        	// 1. Generate table rows strictly in requested order
-        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcUSDPrice, nowStr)
+        	// 1. Generate table rows STRICTLY in requested order
         	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "USD", 2, btcUSDPrice, nowStr)
-        	ltcBtcRow := processCoinRow("LTC / BTC", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
+        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcUSDPrice, nowStr)
         	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
+        	ltcBtcRow := processCoinRow("LTC / BTC", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
 
         	// 2. Save professional compact table styles to external cc.css file
         	cssContent := "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #212529; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box; }\n" +
-        		".table-container { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); max-width: 960px; width: 100%; box-sizing: border-box; border: 1px solid #eff2f5; }\n" +
+        		".table-container { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); max-width: 1000px; width: 100%; box-sizing: border-box; border: 1px solid #eff2f5; }\n" +
         		"h2 { font-size: 20px; font-weight: 700; margin: 0 0 20px 0; color: #1e2329; }\n" +
         		"table { width: 100%; border-collapse: collapse; text-align: left; }\n" +
         		"th { padding: 14px 16px; color: #707a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #eff2f5; }\n" +
@@ -208,7 +215,7 @@ jobs:
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
-        	// 3. Assemble final HTML documentlinked with cc.css. Use concatenation for safety.
+        	// 3. Assemble final HTML document linked with cc.css.
         	htmlContent := `<!DOCTYPE html>
         <html lang="ru">
         <head>
@@ -226,10 +233,11 @@ jobs:
         					<th>Пара</th>
         					<th>Цена</th>
         					<th>Изменение (24ч)</th>
+        					<th>Оперативный (24ч)</th>
         					<th>График (7д)</th>
         				</tr>
         			</thead>
-        			<tbody>` + ltcUsdRow + btcUsdRow + ltcBtcRow + btcLtcRow + `
+        			<tbody>` + btcUsdRow + ltcUsdRow + btcLtcRow + ltcBtcRow + `
         			</tbody>
         		</table>
         	</div>
@@ -248,6 +256,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add cc.html cc.css history_ltc_usd.csv history_btc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
+        git add cc.html cc.css history_btc_usd.csv history_ltc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
         git diff-index --quiet HEAD || git commit -m "Automated dashboard update"
         git push
