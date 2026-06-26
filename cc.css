@@ -6,8 +6,10 @@ td { padding: 16px; border-bottom: 1px solid #eff2f5; font-size: 15px; vertical-
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fcfdfe; }
 .pair-cell { color: #1e2329; font-size: 16px; }
-.price-cell { color: #1e2329; white-space: nowrap; font-size: 16px; line-height: 1.2; }
-.currency { color: #707a8a; font-size: 11px; font-weight: 600; position: relative; top: -4px; margin-right: 1px; font-family: sans-serif; }
+.price-cell { white-space: nowrap; }
+.crypto-price { display: inline-flex; align-items: flex-start; line-height: 1; }
+.digits { color: #1e2329; font-size: 16px; font-weight: bold; }
+.currency { color: #707a8a; font-size: 11px; font-weight: 500; margin-right: 2px; padding-top: 1px; font-family: sans-serif; }
 .trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
 .badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }
 .badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }
