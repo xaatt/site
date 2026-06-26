@@ -1,4 +1,4 @@
-name: Update Litecoin Price
+name: cc.html
 
 on:
   schedule:
