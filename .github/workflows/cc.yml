@@ -207,9 +207,9 @@ jobs:
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
-        	// 2. Generate all 4 trading cards HTML content using raw API values
-        	ltcCard := processCoin("Litecoin (LTC / USD)", "history_ltc.csv", "#3498db", "USD", 2, ltcPrice, nowStr)
-        	btcCard := processCoin("Bitcoin (BTC / USD)", "history_btc.csv", "#f39c12", "USD", 2, btcPrice, nowStr)
+        	// 2. Generate all 4 trading cards HTML content using raw API values (updated history file names)
+        	ltcCard := processCoin("Litecoin (LTC / USD)", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcPrice, nowStr)
+        	btcCard := processCoin("Bitcoin (BTC / USD)", "history_btc_usd.csv", "#f39c12", "USD", 2, btcPrice, nowStr)
         	ltcBtcCard := processCoin("Exchange Rate (LTC / BTC)", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
         	btcLtcCard := processCoin("Exchange Rate (BTC / LTC)", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
 
@@ -244,6 +244,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add cc.html cc.css history_ltc.csv history_btc.csv history_ltc_btc.csv history_btc_ltc.csv
+        git add cc.html cc.css history_ltc_usd.csv history_btc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
         git diff-index --quiet HEAD || git commit -m "Automated dashboard update"
         git push
