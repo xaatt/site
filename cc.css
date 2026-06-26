@@ -8,7 +8,7 @@ tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fcfdfe; }
 .pair-cell { color: #1e2329; font-size: 16px; }
 .price-cell { color: #1e2329; white-space: nowrap; }
-.currency { color: #848e9c; font-size: 13px; font-weight: normal; margin-left: 4px; }
+.currency { color: #848e9c; font-size: 14px; font-weight: 500; margin-left: 4px; }
 .trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
 .badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }
 .badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }
