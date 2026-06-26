@@ -39,9 +39,9 @@ jobs:
         	Price     float64
         }
 
-        // Get spot price from Coinbase API
-        func getPrice(symbol string) (float64, error) {
-        	resp, err := http.Get(fmt.Sprintf("https://api.coinbase.com/v2/prices/%s-USD/spot", symbol))
+        // Fetch spot price for any specific currency pair from Coinbase API
+        func getPrice(pair string) (float64, error) {
+        	resp, err := http.Get(fmt.Sprintf("https://api.coinbase.com/v2/prices/%s/spot", pair))
         	if err != nil {
         		return 0, err
         	}
@@ -56,8 +56,8 @@ jobs:
         	return strconv.ParseFloat(cbResp.Data.Amount, 64)
         }
 
-        // Process coin data, log history and generate SVG chart card
-        func processCoin(symbol, historyFile, strokeColor string, price float64, nowStr string) string {
+        // Process coin data, log history and generate SVG chart card with dynamic precision and units
+        func processCoin(symbol, historyFile, strokeColor, unit string, precision int, price float64, nowStr string) string {
         	// 1. Save current price point to history CSV
         	var fileExists bool
         	if _, err := os.Stat(historyFile); err == nil {
@@ -69,7 +69,7 @@ jobs:
         		if !fileExists {
         			f.WriteString("timestamp,price\n")
         		}
-        		f.WriteString(fmt.Sprintf("%s,%.2f\n", nowStr, price))
+        		f.WriteString(fmt.Sprintf(fmt.Sprintf("%%s,%%.%df\n", precision), nowStr, price))
         		f.Close()
         	}
 
@@ -104,6 +104,9 @@ jobs:
         	svgHeight := 180
         	var svgHTML string
 
+        	// Create dynamic float formatting strings based on required precision
+        	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
+
         	if len(lastPoints) > 1 {
         		minP := lastPoints[0].Price
         		maxP := lastPoints[0].Price
@@ -125,7 +128,7 @@ jobs:
         		var circlesHTML []string
 
         		for i, pt := range lastPoints {
-        			x := (float64(i) / float64(len(lastPoints)-1)) * float64(svgWidth-60) + 30
+        			x := (float64(i) / float64(len(lastPoints)-1)) * float64(svgWidth-75) + 45
         			y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-60) + 30)
         			pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
         			circlesHTML = append(circlesHTML, fmt.Sprintf(`<circle cx="%.2f" cy="%.2f" r="4" fill="#2c3e50"/>`, x, y))
@@ -134,61 +137,81 @@ jobs:
         		pointsStr := strings.Join(pointsCoords, " ")
         		circlesStr := strings.Join(circlesHTML, "\n")
 
+        		maxPStr := fmt.Sprintf(priceLabelFormat, maxP)
+        		minPStr := fmt.Sprintf(priceLabelFormat, minP)
+
         		svgHTML = fmt.Sprintf(`
         		<svg viewBox="0 0 %d %d" class="chart">
-        			<text x="10" y="25" fill="#bdc3c7" font-size="10">$%.2f</text>
-        			<line x1="30" y1="20" x2="%d" y2="20" stroke="#f1f2f6" stroke-dasharray="4"/>
+        			<text x="5" y="24" fill="#bdc3c7" font-size="9">%s</text>
+        			<line x1="45" y1="20" x2="%d" y2="20" stroke="#f1f2f6" stroke-dasharray="4"/>
         			
-        			<text x="10" y="%d" fill="#bdc3c7" font-size="10">$%.2f</text>
-        			<line x1="30" y1="%d" x2="%d" y2="%d" stroke="#f1f2f6" stroke-dasharray="4"/>
+        			<text x="5" y="%d" fill="#bdc3c7" font-size="9">%s</text>
+        			<line x1="45" y1="%d" x2="%d" y2="%d" stroke="#f1f2f6" stroke-dasharray="4"/>
         			
         			<polyline fill="none" stroke="%s" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
         			%s
-        		</svg>`, svgWidth, svgHeight, maxP, svgWidth-10, svgHeight-15, minP, svgHeight-20, svgWidth-10, svgHeight-20, strokeColor, pointsStr, circlesStr)
+        		</svg>`, svgWidth, svgHeight, maxPStr, svgWidth-10, svgHeight-15, minPStr, svgHeight-20, svgWidth-10, svgHeight-20, strokeColor, pointsStr, circlesStr)
         	} else {
         		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px; height:120px; display:flex; align-items:center; justify-content:center;'>Gathering price history...</div>"
         	}
 
+        	// Format main price view
+        	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
+
         	// Return completed HTML card block
         	return fmt.Sprintf(`
         	<div class="card">
-        		<h1>Курс %s</h1>
-        		<div class="price">$%.2f <span class="currency">USD</span></div>
+        		<h1>%s</h1>
+        		<div class="price">%s <span class="currency">%s</span></div>
         		%s
-        	</div>`, symbol, price, svgHTML)
+        	</div>`, symbol, mainPriceStr, unit, svgHTML)
         }
 
         func main() {
         	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
 
-        	// Fetch current market prices
-        	ltcPrice, err := getPrice("LTC")
+        	// Fetch market prices directly from Coinbase API endpoints
+        	ltcPrice, err := getPrice("LTC-USD")
         	if err != nil {
-        		fmt.Println("LTC Error:", err)
+        		fmt.Println("LTC-USD Error:", err)
         		os.Exit(1)
         	}
 
-        	btcPrice, err := getPrice("BTC")
+        	btcPrice, err := getPrice("BTC-USD")
         	if err != nil {
-        		fmt.Println("BTC Error:", err)
+        		fmt.Println("BTC-USD Error:", err)
         		os.Exit(1)
         	}
 
-        	// 1. Save styles to external cc.css file
-        	cssContent := `body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; justify-content: center; }
-        .dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }
-        h1 { font-size: 18px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .price { font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
-        .currency { font-size: 20px; color: #95a5a6; font-weight: normal; }
-        .chart { width: 100%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }
-        .date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }`
+        	ltcBtcPrice, err := getPrice("LTC-BTC")
+        	if err != nil {
+        		fmt.Println("LTC-BTC Error:", err)
+        		os.Exit(1)
+        	}
+
+        	btcLtcPrice, err := getPrice("BTC-LTC")
+        	if err != nil {
+        		fmt.Println("BTC-LTC Error:", err)
+        		os.Exit(1)
+        	}
+
+        	// 1. Save responsive grid styles to external cc.css file
+        	cssContent := "body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; justify-content: center; }\n" +
+        		".dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%; }\n" +
+        		".card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }\n" +
+        		"h1 { font-size: 14px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }\n" +
+        		".price { font-size: 32px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; white-space: nowrap; }\n" +
+        		".currency { font-size: 18px; color: #95a5a6; font-weight: normal; }\n" +
+        		".chart { width: 100%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }\n" +
+        		".date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
-        	// 2. Generate crypto cards HTML content
-        	ltcCard := processCoin("Litecoin (LTC)", "history_ltc.csv", "#3498db", ltcPrice, nowStr)
-        	btcCard := processCoin("Bitcoin (BTC)", "history_btc.csv", "#f39c12", btcPrice, nowStr)
+        	// 2. Generate all 4 trading cards HTML content using raw API values
+        	ltcCard := processCoin("Litecoin (LTC / USD)", "history_ltc.csv", "#3498db", "USD", 2, ltcPrice, nowStr)
+        	btcCard := processCoin("Bitcoin (BTC / USD)", "history_btc.csv", "#f39c12", "USD", 2, btcPrice, nowStr)
+        	ltcBtcCard := processCoin("Exchange Rate (LTC / BTC)", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
+        	btcLtcCard := processCoin("Exchange Rate (BTC / LTC)", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
 
         	// 3. Assemble final HTML document linked with cc.css
         	htmlContent := fmt.Sprintf(`<!DOCTYPE html>
@@ -196,17 +219,19 @@ jobs:
         <head>
         	<meta charset="UTF-8">
         	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        	<title>Крипто Дашборд</title>
+        	<title>Крипто Кросс-Дашборд</title>
         	<link rel="stylesheet" href="cc.css">
         </head>
         <body>
         	<div class="dashboard">
-        		%s
-        		%s
+        		%%s
+        		%%s
+        		%%s
+        		%%s
         	</div>
-        	<div class="date">Последнее обновление: %s UTC</div>
+        	<div class="date">Последнее обновление: %%s UTC</div>
         </body>
-        </html>`, ltcCard, btcCard, nowStr)
+        </html>`, ltcCard, btcCard, ltcBtcCard, btcLtcCard, nowStr)
 
         	os.WriteFile("cc.html", []byte(htmlContent), 0644)
         }
@@ -219,6 +244,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add cc.html cc.css history_ltc.csv history_btc.csv
+        git add cc.html cc.css history_ltc.csv history_btc.csv history_ltc_btc.csv history_btc_ltc.csv
         git diff-index --quiet HEAD || git commit -m "Automated dashboard update"
         git push
