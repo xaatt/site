@@ -224,12 +224,12 @@ jobs:
         </head>
         <body>
         	<div class="dashboard">
-        		%%s
-        		%%s
-        		%%s
-        		%%s
+        		%s
+        		%s
+        		%s
+        		%s
         	</div>
-        	<div class="date">Последнее обновление: %%s UTC</div>
+        	<div class="date">Last update: %s UTC</div>
         </body>
         </html>`, ltcCard, btcCard, ltcBtcCard, btcLtcCard, nowStr)
 
