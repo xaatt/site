@@ -35,7 +35,7 @@ jobs:
         }
 
         type Point struct {
-        	Timestamp string
+        	Timestamp time.Time
         	Price     float64
         }
 
@@ -56,9 +56,53 @@ jobs:
         	return strconv.ParseFloat(cbResp.Data.Amount, 64)
         }
 
-        // Process coin data, log history and generate SVG chart card with dynamic precision and units
-        func processCoin(symbol, historyFile, strokeColor, unit string, precision int, price float64, nowStr string) string {
-        	// 1. Save current price point to history CSV
+        // Generate an SVG line based on filtered time-series points
+        func generateSVG(points []Point, strokeColor string, withCircles bool) string {
+        	if len(points) < 2 {
+        		return "<div class='no-data'>No data</div>"
+        	}
+
+        	svgWidth := 140
+        	svgHeight := 34
+        	minP := points[0].Price
+        	maxP := points[0].Price
+
+        	for _, pt := range points {
+        		if pt.Price < minP {
+        			minP = pt.Price
+        		}
+        		if pt.Price > maxP {
+        			maxP = pt.Price
+        		}
+        	}
+
+        	rng := maxP - minP
+        	if rng == 0 {
+        		rng = 1.0
+        	}
+
+        	var pointsCoords []string
+        	var circlesHTML []string
+
+        	for i, pt := range points {
+        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth-10) + 5
+        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-10) + 5)
+        		pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
+        		if withCircles {
+        			circlesHTML = append(circlesHTML, fmt.Sprintf(`<circle cx="%.2f" cy="%.2f" r="2" fill="#2c3e50"/>`, x, y))
+        		}
+        	}
+
+        	return fmt.Sprintf(`
+        	<svg viewBox="0 0 %d %d" class="sparkline">
+        		<polyline fill="none" stroke="%s" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
+        		%s
+        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "), strings.Join(circlesHTML, "\n"))
+        }
+
+        // Process asset data, filter points by real time intervals, and return a clean HTML table row
+        func processCoinRow(symbol, historyFile, strokeColor, unit string, precision int, price float64, nowStr string) string {
+        	// 1. Log current price point to history CSV
         	var fileExists bool
         	if _, err := os.Stat(historyFile); err == nil {
         		fileExists = true
@@ -73,165 +117,147 @@ jobs:
         		f.Close()
         	}
 
-        	// 2. Read price history from CSV
+        	// 2. Read full history and parse points into struct with true time tracking
         	data, err := os.ReadFile(historyFile)
         	if err != nil {
-        		return "<div class='card'>Data read error</div>"
+        		return "<tr><td colspan='5'>Data error</td></tr>"
         	}
 
         	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
         	if len(lines) > 1 {
-        		lines = lines[1:] // skip CSV header
+        		lines = lines[1:]
         	}
 
-        	start := len(lines) - 24
-        	if start < 0 {
-        		start = 0
-        	}
-        	lastLines := lines[start:]
-
-        	var lastPoints []Point
-        	for _, line := range lastLines {
+        	var allPoints []Point
+        	timeLayout := "2006-01-02 15:04:05"
+        	for _, line := range lines {
         		parts := strings.Split(line, ",")
         		if len(parts) == 2 {
-        			p, _ := strconv.ParseFloat(parts[1], 64)
-        			lastPoints = append(lastPoints, Point{Timestamp: parts[0], Price: p})
+        			tValue, errT := time.Parse(timeLayout, parts[0])
+        			pValue, errP := strconv.ParseFloat(parts[1], 64)
+        			if errT == nil && errP == nil {
+        				allPoints = append(allPoints, Point{Timestamp: tValue, Price: pValue})
+        			}
         		}
         	}
 
-        	// 3. Build SVG chart inside the card
-        	svgWidth := 500
-        	svgHeight := 180
-        	var svgHTML string
+        	// 3. Filter points dynamically by time differences instead of row counting
+        	var points24h []Point
+        	var points7d []Point
+        	nowTime := time.Now().UTC()
 
-        	// Create dynamic float formatting strings based on required precision
+        	for _, pt := range allPoints {
+        		duration := nowTime.Sub(pt.Timestamp)
+        		if duration <= 24*time.Hour {
+        			points24h = append(points24h, pt)
+        		}
+        		if duration <= 7*24*time.Hour {
+        			points7d = append(points7d, pt)
+        		}
+        	}
+
+        	// 4. Calculate mathematical 24h change percentage based on the oldest point within the 24h window
+        	changePercent := 0.0
+        	trendClass := "neutral"
+        	changeText := "0.00%"
+
+        	if len(points24h) > 1 {
+        		oldPrice := points24h[0].Price
+        		if oldPrice > 0 {
+        			changePercent = ((price - oldPrice) / oldPrice) * 100
+        		}
+        		if changePercent > 0 {
+        			trendClass = "up"
+        			changeText = fmt.Sprintf("+%.2f%% ↗", changePercent)
+        		} else if changePercent < 0 {
+        			trendClass = "down"
+        			changeText = fmt.Sprintf("%.2f%% ↘", changePercent)
+        		}
+        	}
+
+        	// 5. Generate both SVGs
+        	svg24h := generateSVG(points24h, strokeColor, true)
+        	svg7d := generateSVG(points7d, strokeColor, false)
+
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
-
-        	if len(lastPoints) > 1 {
-        		minP := lastPoints[0].Price
-        		maxP := lastPoints[0].Price
-        		for _, pt := range lastPoints {
-        			if pt.Price < minP {
-        				minP = pt.Price
-        			}
-        			if pt.Price > maxP {
-        				maxP = pt.Price
-        			}
-        		}
-
-        		rng := maxP - minP
-        		if rng == 0 {
-        			rng = 1.0
-        		}
-
-        		var pointsCoords []string
-        		var circlesHTML []string
-
-        		for i, pt := range lastPoints {
-        			x := (float64(i) / float64(len(lastPoints)-1)) * float64(svgWidth-75) + 45
-        			y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-60) + 30)
-        			pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
-        			circlesHTML = append(circlesHTML, fmt.Sprintf(`<circle cx="%.2f" cy="%.2f" r="4" fill="#2c3e50"/>`, x, y))
-        		}
-
-        		pointsStr := strings.Join(pointsCoords, " ")
-        		circlesStr := strings.Join(circlesHTML, "\n")
-
-        		maxPStr := fmt.Sprintf(priceLabelFormat, maxP)
-        		minPStr := fmt.Sprintf(priceLabelFormat, minP)
-
-        		svgHTML = fmt.Sprintf(`
-        		<svg viewBox="0 0 %d %d" class="chart">
-        			<text x="5" y="24" fill="#bdc3c7" font-size="9">%s</text>
-        			<line x1="45" y1="20" x2="%d" y2="20" stroke="#f1f2f6" stroke-dasharray="4"/>
-        			
-        			<text x="5" y="%d" fill="#bdc3c7" font-size="9">%s</text>
-        			<line x1="45" y1="%d" x2="%d" y2="%d" stroke="#f1f2f6" stroke-dasharray="4"/>
-        			
-        			<polyline fill="none" stroke="%s" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
-        			%s
-        		</svg>`, svgWidth, svgHeight, maxPStr, svgWidth-10, svgHeight-15, minPStr, svgHeight-20, svgWidth-10, svgHeight-20, strokeColor, pointsStr, circlesStr)
-        	} else {
-        		svgHTML = "<div style='padding: 20px; color:#95a5a6; font-size:14px; height:120px; display:flex; align-items:center; justify-content:center;'>Gathering price history...</div>"
-        	}
-
-        	// Format main price view
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
 
-        	// Return completed HTML card block
+        	// Return structured HTML table row
         	return fmt.Sprintf(`
-        	<div class="card">
-        		<h1>%s</h1>
-        		<div class="price">%s <span class="currency">%s</span></div>
-        		%s
-        	</div>`, symbol, mainPriceStr, unit, svgHTML)
+        	<tr>
+        		<td class="pair-cell"><b>%s</b></td>
+        		<td class="price-cell"><b>%s</b> <span class="currency">%s</span></td>
+        		<td class="change-cell"><span class="trend badge-%s">%s</span></td>
+        		<td class="chart-cell">%s</td>
+        		<td class="chart-cell">%s</td>
+        	</tr>`, symbol, mainPriceStr, unit, trendClass, changeText, svg24h, svg7d)
         }
 
         func main() {
         	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
 
         	// Fetch market prices directly from Coinbase API endpoints
-        	ltcPrice, err := getPrice("LTC-USD")
-        	if err != nil {
-        		fmt.Println("LTC-USD Error:", err)
-        		os.Exit(1)
-        	}
+        	btcPrice, _ := getPrice("BTC-USD")
+        	ltcPrice, _ := getPrice("LTC-USD")
+        	btcLtcPrice, _ := getPrice("BTC-LTC")
+        	ltcBtcPrice, _ := getPrice("LTC-BTC")
 
-        	btcPrice, err := getPrice("BTC-USD")
-        	if err != nil {
-        		fmt.Println("BTC-USD Error:", err)
-        		os.Exit(1)
-        	}
+        	// 1. Generate table rows strictly in requested order
+        	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "USD", 2, btcPrice, nowStr)
+        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcPrice, nowStr)
+        	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
+        	ltcBtcRow := processCoinRow("LTC / BTC", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
 
-        	ltcBtcPrice, err := getPrice("LTC-BTC")
-        	if err != nil {
-        		fmt.Println("LTC-BTC Error:", err)
-        		os.Exit(1)
-        	}
-
-        	btcLtcPrice, err := getPrice("BTC-LTC")
-        	if err != nil {
-        		fmt.Println("BTC-LTC Error:", err)
-        		os.Exit(1)
-        	}
-
-        	// 1. Save responsive grid styles to external cc.css file
-        	cssContent := "body { font-family: sans-serif; background: #f5f7fa; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; justify-content: center; }\n" +
-        		".dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1100px; width: 100%; }\n" +
-        		".card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; flex: 1; min-width: 320px; max-width: 500px; box-sizing: border-box; }\n" +
-        		"h1 { font-size: 14px; color: #7f8c8d; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }\n" +
-        		".price { font-size: 32px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; white-space: nowrap; }\n" +
-        		".currency { font-size: 18px; color: #95a5a6; font-weight: normal; }\n" +
-        		".chart { width: 100%; height: auto; margin-top: 25px; background: #fafafa; border-radius: 8px; border: 1px solid #eaeaea; }\n" +
-        		".date { font-size: 11px; color: #bdc3c7; margin-top: 25px; text-align: center; }"
+        	// 2. Save professional compact table styles to external cc.css file
+        	cssContent := "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #212529; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box; }\n" +
+        		".table-container { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); max-width: 960px; width: 100%; box-sizing: border-box; border: 1px solid #eff2f5; }\n" +
+        		"h2 { font-size: 20px; font-weight: 700; margin: 0 0 20px 0; color: #1e2329; }\n" +
+        		"table { width: 100%; border-collapse: collapse; text-align: left; }\n" +
+        		"th { padding: 14px 16px; color: #707a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #eff2f5; }\n" +
+        		"td { padding: 16px; border-bottom: 1px solid #eff2f5; font-size: 15px; vertical-align: middle; }\n" +
+        		"tr:last-child td { border-bottom: none; }\n" +
+        		"tr:hover td { background: #fcfdfe; }\n" +
+        		".pair-cell { color: #1e2329; font-size: 16px; }\n" +
+        		".price-cell { color: #1e2329; white-space: nowrap; }\n" +
+        		".currency { color: #848e9c; font-size: 13px; font-weight: normal; margin-left: 4px; }\n" +
+        		".trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }\n" +
+        		".badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }\n" +
+        		".badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }\n" +
+        		".badge-neutral { color: #707a8a; background: #f0f2f5; }\n" +
+        		".sparkline { width: 140px; height: 34px; display: block; }\n" +
+        		".date { font-size: 12px; color: #707a8a; margin-top: 24px; text-align: center; }"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
-        	// 2. Generate all 4 trading cards HTML content using raw API values (updated history file names)
-        	ltcCard := processCoin("Litecoin (LTC / USD)", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcPrice, nowStr)
-        	btcCard := processCoin("Bitcoin (BTC / USD)", "history_btc_usd.csv", "#f39c12", "USD", 2, btcPrice, nowStr)
-        	ltcBtcCard := processCoin("Exchange Rate (LTC / BTC)", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
-        	btcLtcCard := processCoin("Exchange Rate (BTC / LTC)", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
-
-        	// 3. Assemble final HTML document linked with cc.css
-        	htmlContent := fmt.Sprintf(`<!DOCTYPE html>
+        	// 3. Construct premium static HTML table via bulletproof string concatenation
+        	htmlContent := `<!DOCTYPE html>
         <html lang="ru">
         <head>
         	<meta charset="UTF-8">
         	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        	<title>Крипто Кросс-Дашборд</title>
+        	<title>Крипто Терминал</title>
         	<link rel="stylesheet" href="cc.css">
         </head>
         <body>
-        	<div class="dashboard">
-        		%s
-        		%s
-        		%s
-        		%s
+        	<div class="table-container">
+        		<h2>Компактный список</h2>
+        		<table>
+        			<thead>
+        				<tr>
+        					<th>Пара</th>
+        					<th>Цена</th>
+        					<th>Изменение (24ч)</th>
+        					<th>Оперативный (24ч)</th>
+        					<th>Стратегический (7д)</th>
+        				</tr>
+        			</thead>
+        			<tbody>` + btcUsdRow + ltcUsdRow + btcLtcRow + ltcBtcRow + `
+        			</tbody>
+        		</table>
         	</div>
-        	<div class="date">Last update: %s UTC</div>
+        	<div class="date">Last update: ` + nowStr + ` UTC</div>
         </body>
-        </html>`, ltcCard, btcCard, ltcBtcCard, btcLtcCard, nowStr)
+        </html>`
 
         	os.WriteFile("cc.html", []byte(htmlContent), 0644)
         }
@@ -244,6 +270,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add cc.html cc.css history_ltc_usd.csv history_btc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
+        git add cc.html cc.css history_btc_usd.csv history_ltc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
         git diff-index --quiet HEAD || git commit -m "Automated dashboard update"
         git push
