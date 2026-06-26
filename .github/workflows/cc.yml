@@ -168,7 +168,7 @@ jobs:
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
 
-        	// Return structured HTML table row with prefix currency symbol
+        	// Return structured HTML table row
         	return fmt.Sprintf(`
         	<tr>
         		<td class="pair-cell"><b>%s</b></td>
@@ -188,7 +188,7 @@ jobs:
         	btcLtcPrice, _ := getPrice("BTC-LTC")
         	ltcBtcPrice, _ := getPrice("LTC-BTC")
 
-        	// 1. Generate table rows with updated currency symbols at the beginning (no spaces)
+        	// 1. Generate table rows
         	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "$", 2, btcUSDPrice, nowStr)
         	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "$", 2, ltcUSDPrice, nowStr)
         	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "Ł", 2, btcLtcPrice, nowStr)
@@ -203,8 +203,8 @@ jobs:
         		"tr:last-child td { border-bottom: none; }\n" +
         		"tr:hover td { background: #fcfdfe; }\n" +
         		".pair-cell { color: #1e2329; font-size: 16px; }\n" +
-        		".price-cell { color: #1e2329; white-space: nowrap; }\n" +
-        		".currency { color: #848e9c; font-size: 15px; font-weight: 500; margin-right: 1px; }\n" +
+        		".price-cell { color: #1e2329; white-space: nowrap; display: flex; align-items: baseline; }\n" +
+        		".currency { color: #707a8a; font-size: 12px; font-weight: 600; margin-right: 1px; transform: translateY(-1px); display: inline-block; }\n" +
         		".trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }\n" +
         		".badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }\n" +
         		".badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }\n" +
@@ -214,7 +214,7 @@ jobs:
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
-        	// 3. Assemble final HTML document (without "Компактный список" header)
+        	// 3. Assemble final HTML document
         	htmlContent := `<!DOCTYPE html>
         <html lang="ru">
         <head>
