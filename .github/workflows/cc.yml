@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate No-JS Crypto Dashboard (Go)
+    - name: Run Update and Generate Premium Crypto Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -56,8 +56,8 @@ jobs:
         	return strconv.ParseFloat(cbResp.Data.Amount, 64)
         }
 
-        // Generate an SVG line based on filtered time-series points
-        func generateSVG(points []Point, strokeColor string, withCircles bool) string {
+        // Generate an SVG line based on time-series points
+        func generateSVG(points []Point, strokeColor string) string {
         	if len(points) < 2 {
         		return "<div class='no-data'>No data</div>"
         	}
@@ -68,39 +68,27 @@ jobs:
         	maxP := points[0].Price
 
         	for _, pt := range points {
-        		if pt.Price < minP {
-        			minP = pt.Price
-        		}
-        		if pt.Price > maxP {
-        			maxP = pt.Price
-        		}
+        		if pt.Price < minP { minP = pt.Price }
+        		if pt.Price > maxP { maxP = pt.Price }
         	}
 
         	rng := maxP - minP
-        	if rng == 0 {
-        		rng = 1.0
-        	}
+        	if rng == 0 { rng = 1.0 }
 
         	var pointsCoords []string
-        	var circlesHTML []string
-
         	for i, pt := range points {
-        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth-10) + 5
-        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-10) + 5)
+        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth-6) + 3
+        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-6) + 3)
         		pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
-        		if withCircles {
-        			circlesHTML = append(circlesHTML, fmt.Sprintf(`<circle cx="%.2f" cy="%.2f" r="2" fill="#2c3e50"/>`, x, y))
-        		}
         	}
 
         	return fmt.Sprintf(`
         	<svg viewBox="0 0 %d %d" class="sparkline">
         		<polyline fill="none" stroke="%s" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
-        		%s
-        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "), strings.Join(circlesHTML, "\n"))
+        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "))
         }
 
-        // Process asset data, filter points by real time intervals, and return a clean HTML table row
+        // Process asset data, filter points, and return a clean HTML table row
         func processCoinRow(symbol, historyFile, strokeColor, unit string, precision int, price float64, nowStr string) string {
         	// 1. Log current price point to history CSV
         	var fileExists bool
@@ -117,10 +105,10 @@ jobs:
         		f.Close()
         	}
 
-        	// 2. Read full history and parse points into struct with true time tracking
+        	// 2. Read history and parse with real time tracking
         	data, err := os.ReadFile(historyFile)
         	if err != nil {
-        		return "<tr><td colspan='5'>Data error</td></tr>"
+        		return "<tr><td colspan='4'>Data error</td></tr>"
         	}
 
         	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
@@ -128,35 +116,28 @@ jobs:
         		lines = lines[1:]
         	}
 
-        	var allPoints []Point
+        	var points24h []Point
+        	var points7d []Point
+        	nowTime := time.Now().UTC()
         	timeLayout := "2006-01-02 15:04:05"
+
         	for _, line := range lines {
         		parts := strings.Split(line, ",")
         		if len(parts) == 2 {
-        			tValue, errT := time.Parse(timeLayout, parts[0])
-        			pValue, errP := strconv.ParseFloat(parts[1], 64)
-        			if errT == nil && errP == nil {
-        				allPoints = append(allPoints, Point{Timestamp: tValue, Price: pValue})
+        			tValue, _ := time.Parse(timeLayout, parts[0])
+        			pValue, _ := strconv.ParseFloat(parts[1], 64)
+        			duration := nowTime.Sub(tValue)
+        			
+        			if duration <= 24*time.Hour {
+        				points24h = append(points24h, Point{Timestamp: tValue, Price: pValue})
+        			}
+        			if duration <= 7*24*time.Hour {
+        				points7d = append(points7d, Point{Timestamp: tValue, Price: pValue})
         			}
         		}
         	}
 
-        	// 3. Filter points dynamically by time differences instead of row counting
-        	var points24h []Point
-        	var points7d []Point
-        	nowTime := time.Now().UTC()
-
-        	for _, pt := range allPoints {
-        		duration := nowTime.Sub(pt.Timestamp)
-        		if duration <= 24*time.Hour {
-        			points24h = append(points24h, pt)
-        		}
-        		if duration <= 7*24*time.Hour {
-        			points7d = append(points7d, pt)
-        		}
-        	}
-
-        	// 4. Calculate mathematical 24h change percentage based on the oldest point within the 24h window
+        	// 3. Calculate dynamic percentage based on the oldest point in the 24h window
         	changePercent := 0.0
         	trendClass := "neutral"
         	changeText := "0.00%"
@@ -175,9 +156,8 @@ jobs:
         		}
         	}
 
-        	// 5. Generate both SVGs
-        	svg24h := generateSVG(points24h, strokeColor, true)
-        	svg7d := generateSVG(points7d, strokeColor, false)
+        	// 4. Generate SVG 7d sparkline
+        	svg7d := generateSVG(points7d, strokeColor)
 
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
@@ -189,24 +169,23 @@ jobs:
         		<td class="price-cell"><b>%s</b> <span class="currency">%s</span></td>
         		<td class="change-cell"><span class="trend badge-%s">%s</span></td>
         		<td class="chart-cell">%s</td>
-        		<td class="chart-cell">%s</td>
-        	</tr>`, symbol, mainPriceStr, unit, trendClass, changeText, svg24h, svg7d)
+        	</tr>`, symbol, mainPriceStr, unit, trendClass, changeText, svg7d)
         }
 
         func main() {
         	nowStr := time.Now().UTC().Format("2006-01-02 15:04:05")
 
         	// Fetch market prices directly from Coinbase API endpoints
-        	btcPrice, _ := getPrice("BTC-USD")
-        	ltcPrice, _ := getPrice("LTC-USD")
-        	btcLtcPrice, _ := getPrice("BTC-LTC")
+        	ltcUSDPrice, _ := getPrice("LTC-USD")
+        	btcUSDPrice, _ := getPrice("BTC-USD")
         	ltcBtcPrice, _ := getPrice("LTC-BTC")
+        	btcLtcPrice, _ := getPrice("BTC-LTC")
 
         	// 1. Generate table rows strictly in requested order
-        	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "USD", 2, btcPrice, nowStr)
-        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcPrice, nowStr)
-        	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
+        	ltcUsdRow := processCoinRow("LTC / USD", "history_ltc_usd.csv", "#3498db", "USD", 2, ltcUSDPrice, nowStr)
+        	btcUsdRow := processCoinRow("BTC / USD", "history_btc_usd.csv", "#f39c12", "USD", 2, btcUSDPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC / BTC", "history_ltc_btc.csv", "#2ecc71", "BTC", 6, ltcBtcPrice, nowStr)
+        	btcLtcRow := processCoinRow("BTC / LTC", "history_btc_ltc.csv", "#9b59b6", "LTC", 2, btcLtcPrice, nowStr)
 
         	// 2. Save professional compact table styles to external cc.css file
         	cssContent := "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #212529; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box; }\n" +
@@ -229,7 +208,7 @@ jobs:
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
-        	// 3. Construct premium static HTML table via bulletproof string concatenation
+        	// 3. Assemble final HTML documentlinked with cc.css. Use concatenation for safety.
         	htmlContent := `<!DOCTYPE html>
         <html lang="ru">
         <head>
@@ -247,11 +226,10 @@ jobs:
         					<th>Пара</th>
         					<th>Цена</th>
         					<th>Изменение (24ч)</th>
-        					<th>Оперативный (24ч)</th>
-        					<th>Стратегический (7д)</th>
+        					<th>График (7д)</th>
         				</tr>
         			</thead>
-        			<tbody>` + btcUsdRow + ltcUsdRow + btcLtcRow + ltcBtcRow + `
+        			<tbody>` + ltcUsdRow + btcUsdRow + ltcBtcRow + btcLtcRow + `
         			</tbody>
         		</table>
         	</div>
@@ -270,6 +248,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add cc.html cc.css history_btc_usd.csv history_ltc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
+        git add cc.html cc.css history_ltc_usd.csv history_btc_usd.csv history_ltc_btc.csv history_btc_ltc.csv
         git diff-index --quiet HEAD || git commit -m "Automated dashboard update"
         git push
