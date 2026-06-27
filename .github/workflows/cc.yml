@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Responsive Unix Crypto Table (Go)
+    - name: Run Update and Generate Raw Unix Crypto Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -86,7 +86,7 @@ jobs:
         	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "))
         }
 
-        func processCoinRow(symbol, historyFile, unit string, precision int, price float64, nowStr string) string {
+        func processCoinRow(symbol, historyFile string, precision int, price float64, nowStr string) string {
         	var fileExists bool
         	if _, err := os.Stat(historyFile); err == nil {
         		fileExists = true
@@ -159,11 +159,11 @@ jobs:
         	return fmt.Sprintf(`
         	<tr>
         		<td class="pair-cell">%s</td>
-        		<td class="price-cell">%s%s</td>
+        		<td class="price-cell">%s</td>
         		<td class="change-cell %s">%s</td>
         		<td class="chart-cell">%s</td>
         		<td class="chart-cell">%s</td>
-        	</tr>`, symbol, unit, mainPriceStr, trendClass, changeText, svg24h, svg7d)
+        	</tr>`, symbol, mainPriceStr, trendClass, changeText, svg24h, svg7d)
         }
 
         func main() {
@@ -174,12 +174,11 @@ jobs:
         	btcLtcPrice, _ := getPrice("BTC-LTC")
         	ltcBtcPrice, _ := getPrice("LTC-BTC")
 
-        	btcUsdRow := processCoinRow("BTC/USD", "history_btc_usd.csv", "$", 2, btcUSDPrice, nowStr)
-        	ltcUsdRow := processCoinRow("LTC/USD", "history_ltc_usd.csv", "$", 2, ltcUSDPrice, nowStr)
-        	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", "Ł", 2, btcLtcPrice, nowStr)
-        	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", "₿", 6, ltcBtcPrice, nowStr)
+        	btcUsdRow := processCoinRow("BTC/USD", "history_btc_usd.csv", 2, btcUSDPrice, nowStr)
+        	ltcUsdRow := processCoinRow("LTC/USD", "history_ltc_usd.csv", 2, ltcUSDPrice, nowStr)
+        	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", 2, btcLtcPrice, nowStr)
+        	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
-        	// Адаптивный CSS без карточек и теней
         	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
         		".terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; overflow-x: hidden; }\n" +
         		"table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }\n" +
