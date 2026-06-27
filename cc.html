@@ -1,209 +1,79 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Крипто Терминал</title>
+	<title>crypto_terminal</title>
 	<link rel="stylesheet" href="cc.css">
 </head>
 <body>
-	<div class="table-container">
+	<div class="terminal-container">
 		<table>
 			<thead>
 				<tr>
-					<th>Пара</th>
-					<th>Цена</th>
-					<th>Изменение (24ч)</th>
-					<th>Оперативный (24ч)</th>
-					<th>График (7д)</th>
+					<th>pair</th>
+					<th>price</th>
+					<th>change_24h</th>
+					<th>chart_24h</th>
+					<th>chart_7d</th>
 				</tr>
 			</thead>
 			<tbody>
 	<tr>
-		<td class="pair-cell"><b>BTC / USD</b></td>
-		<td class="price-cell">
-			<div class="crypto-price">
-				<span class="currency">$</span>
-				<span class="digits">60604.71</span>
-			</div>
-		</td>
-		<td class="change-cell"><span class="trend badge-up">+1.36% ↗</span></td>
+		<td class="pair-cell">BTC/USD</td>
+		<td class="price-cell">$60526.82</td>
+		<td class="change-cell up">+1.23%</td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,23.27 10.00,23.64 15.00,26.16 20.00,28.79 25.00,29.00 30.00,27.50 35.00,22.42 40.00,21.30 45.00,23.35 50.00,22.96 55.00,21.43 60.00,21.43 65.00,21.48 70.00,20.03 75.00,19.16 80.00,19.42 85.00,18.98 90.00,18.51 95.00,18.80 100.00,18.68 105.00,21.07 110.00,16.26 115.00,11.75 120.00,11.78 125.00,14.82 130.00,5.03 135.00,5.00"/>
-		<circle cx="5.00" cy="23.27" r="1.5" fill="#2c3e50"/>
-<circle cx="10.00" cy="23.64" r="1.5" fill="#2c3e50"/>
-<circle cx="15.00" cy="26.16" r="1.5" fill="#2c3e50"/>
-<circle cx="20.00" cy="28.79" r="1.5" fill="#2c3e50"/>
-<circle cx="25.00" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="30.00" cy="27.50" r="1.5" fill="#2c3e50"/>
-<circle cx="35.00" cy="22.42" r="1.5" fill="#2c3e50"/>
-<circle cx="40.00" cy="21.30" r="1.5" fill="#2c3e50"/>
-<circle cx="45.00" cy="23.35" r="1.5" fill="#2c3e50"/>
-<circle cx="50.00" cy="22.96" r="1.5" fill="#2c3e50"/>
-<circle cx="55.00" cy="21.43" r="1.5" fill="#2c3e50"/>
-<circle cx="60.00" cy="21.43" r="1.5" fill="#2c3e50"/>
-<circle cx="65.00" cy="21.48" r="1.5" fill="#2c3e50"/>
-<circle cx="70.00" cy="20.03" r="1.5" fill="#2c3e50"/>
-<circle cx="75.00" cy="19.16" r="1.5" fill="#2c3e50"/>
-<circle cx="80.00" cy="19.42" r="1.5" fill="#2c3e50"/>
-<circle cx="85.00" cy="18.98" r="1.5" fill="#2c3e50"/>
-<circle cx="90.00" cy="18.51" r="1.5" fill="#2c3e50"/>
-<circle cx="95.00" cy="18.80" r="1.5" fill="#2c3e50"/>
-<circle cx="100.00" cy="18.68" r="1.5" fill="#2c3e50"/>
-<circle cx="105.00" cy="21.07" r="1.5" fill="#2c3e50"/>
-<circle cx="110.00" cy="16.26" r="1.5" fill="#2c3e50"/>
-<circle cx="115.00" cy="11.75" r="1.5" fill="#2c3e50"/>
-<circle cx="120.00" cy="11.78" r="1.5" fill="#2c3e50"/>
-<circle cx="125.00" cy="14.82" r="1.5" fill="#2c3e50"/>
-<circle cx="130.00" cy="5.03" r="1.5" fill="#2c3e50"/>
-<circle cx="135.00" cy="5.00" r="1.5" fill="#2c3e50"/>
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#a9b1d6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,14.18 4.44,14.43 8.89,16.11 13.33,17.86 17.78,18.00 22.22,17.00 26.67,13.61 31.11,12.87 35.56,14.23 40.00,13.97 44.44,12.96 48.89,12.96 53.33,12.99 57.78,12.02 62.22,11.44 66.67,11.61 71.11,11.32 75.56,11.00 80.00,11.20 84.44,11.12 88.89,12.71 93.33,9.51 97.78,6.50 102.22,6.52 106.67,8.54 111.11,2.02 115.56,2.00 120.00,3.17"/>
 	</svg></td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#f39c12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,23.27 10.00,23.64 15.00,26.16 20.00,28.79 25.00,29.00 30.00,27.50 35.00,22.42 40.00,21.30 45.00,23.35 50.00,22.96 55.00,21.43 60.00,21.43 65.00,21.48 70.00,20.03 75.00,19.16 80.00,19.42 85.00,18.98 90.00,18.51 95.00,18.80 100.00,18.68 105.00,21.07 110.00,16.26 115.00,11.75 120.00,11.78 125.00,14.82 130.00,5.03 135.00,5.00"/>
-		
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#787c99" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,14.18 4.44,14.43 8.89,16.11 13.33,17.86 17.78,18.00 22.22,17.00 26.67,13.61 31.11,12.87 35.56,14.23 40.00,13.97 44.44,12.96 48.89,12.96 53.33,12.99 57.78,12.02 62.22,11.44 66.67,11.61 71.11,11.32 75.56,11.00 80.00,11.20 84.44,11.12 88.89,12.71 93.33,9.51 97.78,6.50 102.22,6.52 106.67,8.54 111.11,2.02 115.56,2.00 120.00,3.17"/>
 	</svg></td>
 	</tr>
 	<tr>
-		<td class="pair-cell"><b>LTC / USD</b></td>
-		<td class="price-cell">
-			<div class="crypto-price">
-				<span class="currency">$</span>
-				<span class="digits">43.08</span>
-			</div>
-		</td>
-		<td class="change-cell"><span class="trend badge-up">+4.69% ↗</span></td>
+		<td class="pair-cell">LTC/USD</td>
+		<td class="price-cell">$43.03</td>
+		<td class="change-cell up">+4.57%</td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,29.00 9.33,21.04 13.67,22.16 18.00,20.54 22.33,21.29 26.67,21.17 31.00,18.31 35.33,20.30 39.67,21.17 44.00,21.04 48.33,20.92 52.67,20.05 57.00,21.79 61.33,20.92 65.67,20.05 70.00,20.05 74.33,20.17 78.67,20.05 83.00,19.42 87.33,19.42 91.67,19.42 96.00,19.42 100.33,19.55 104.67,19.42 109.00,18.68 113.33,16.07 117.67,13.21 122.00,10.22 126.33,13.21 130.67,5.37 135.00,5.00"/>
-		<circle cx="5.00" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="9.33" cy="21.04" r="1.5" fill="#2c3e50"/>
-<circle cx="13.67" cy="22.16" r="1.5" fill="#2c3e50"/>
-<circle cx="18.00" cy="20.54" r="1.5" fill="#2c3e50"/>
-<circle cx="22.33" cy="21.29" r="1.5" fill="#2c3e50"/>
-<circle cx="26.67" cy="21.17" r="1.5" fill="#2c3e50"/>
-<circle cx="31.00" cy="18.31" r="1.5" fill="#2c3e50"/>
-<circle cx="35.33" cy="20.30" r="1.5" fill="#2c3e50"/>
-<circle cx="39.67" cy="21.17" r="1.5" fill="#2c3e50"/>
-<circle cx="44.00" cy="21.04" r="1.5" fill="#2c3e50"/>
-<circle cx="48.33" cy="20.92" r="1.5" fill="#2c3e50"/>
-<circle cx="52.67" cy="20.05" r="1.5" fill="#2c3e50"/>
-<circle cx="57.00" cy="21.79" r="1.5" fill="#2c3e50"/>
-<circle cx="61.33" cy="20.92" r="1.5" fill="#2c3e50"/>
-<circle cx="65.67" cy="20.05" r="1.5" fill="#2c3e50"/>
-<circle cx="70.00" cy="20.05" r="1.5" fill="#2c3e50"/>
-<circle cx="74.33" cy="20.17" r="1.5" fill="#2c3e50"/>
-<circle cx="78.67" cy="20.05" r="1.5" fill="#2c3e50"/>
-<circle cx="83.00" cy="19.42" r="1.5" fill="#2c3e50"/>
-<circle cx="87.33" cy="19.42" r="1.5" fill="#2c3e50"/>
-<circle cx="91.67" cy="19.42" r="1.5" fill="#2c3e50"/>
-<circle cx="96.00" cy="19.42" r="1.5" fill="#2c3e50"/>
-<circle cx="100.33" cy="19.55" r="1.5" fill="#2c3e50"/>
-<circle cx="104.67" cy="19.42" r="1.5" fill="#2c3e50"/>
-<circle cx="109.00" cy="18.68" r="1.5" fill="#2c3e50"/>
-<circle cx="113.33" cy="16.07" r="1.5" fill="#2c3e50"/>
-<circle cx="117.67" cy="13.21" r="1.5" fill="#2c3e50"/>
-<circle cx="122.00" cy="10.22" r="1.5" fill="#2c3e50"/>
-<circle cx="126.33" cy="13.21" r="1.5" fill="#2c3e50"/>
-<circle cx="130.67" cy="5.37" r="1.5" fill="#2c3e50"/>
-<circle cx="135.00" cy="5.00" r="1.5" fill="#2c3e50"/>
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#a9b1d6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,18.00 3.87,12.69 7.74,13.44 11.61,12.36 15.48,12.86 19.35,12.78 23.23,10.87 27.10,12.20 30.97,12.78 34.84,12.69 38.71,12.61 42.58,12.03 46.45,13.19 50.32,12.61 54.19,12.03 58.06,12.03 61.94,12.11 65.81,12.03 69.68,11.62 73.55,11.62 77.42,11.62 81.29,11.62 85.16,11.70 89.03,11.62 92.90,11.12 96.77,9.38 100.65,7.47 104.52,5.48 108.39,7.47 112.26,2.25 116.13,2.00 120.00,2.41"/>
 	</svg></td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,12.15 7.28,13.00 9.56,12.15 11.84,10.98 14.12,11.96 16.40,11.37 18.68,12.09 20.96,11.24 23.25,16.77 25.53,29.00 27.81,25.36 30.09,20.74 32.37,18.92 34.65,17.88 36.93,16.71 39.21,14.50 41.49,15.99 43.77,16.45 46.05,21.26 48.33,20.41 50.61,20.28 52.89,17.68 55.18,19.31 57.46,22.76 59.74,14.24 62.02,16.38 64.30,19.11 66.58,17.55 68.86,13.39 71.14,13.98 73.42,13.13 75.70,13.52 77.98,13.46 80.26,11.96 82.54,13.00 84.82,13.46 87.11,13.39 89.39,13.33 91.67,12.87 93.95,13.78 96.23,13.33 98.51,12.87 100.79,12.87 103.07,12.93 105.35,12.87 107.63,12.54 109.91,12.54 112.19,12.54 114.47,12.54 116.75,12.61 119.04,12.54 121.32,12.15 123.60,10.79 125.88,9.29 128.16,7.73 130.44,9.29 132.72,5.20 135.00,5.00"/>
-		
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#787c99" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,6.77 2.07,7.33 4.14,6.77 6.21,5.99 8.28,6.64 10.34,6.25 12.41,6.73 14.48,6.16 16.55,9.85 18.62,18.00 20.69,15.57 22.76,12.49 24.83,11.28 26.90,10.59 28.97,9.80 31.03,8.33 33.10,9.33 35.17,9.63 37.24,12.84 39.31,12.28 41.38,12.19 43.45,10.46 45.52,11.54 47.59,13.84 49.66,8.16 51.72,9.59 53.79,11.41 55.86,10.37 57.93,7.59 60.00,7.98 62.07,7.42 64.14,7.68 66.21,7.64 68.28,6.64 70.34,7.33 72.41,7.64 74.48,7.59 76.55,7.55 78.62,7.25 80.69,7.85 82.76,7.55 84.83,7.25 86.90,7.25 88.97,7.29 91.03,7.25 93.10,7.03 95.17,7.03 97.24,7.03 99.31,7.03 101.38,7.07 103.45,7.03 105.52,6.77 107.59,5.86 109.66,4.86 111.72,3.82 113.79,4.86 115.86,2.13 117.93,2.00 120.00,2.22"/>
 	</svg></td>
 	</tr>
 	<tr>
-		<td class="pair-cell"><b>BTC / LTC</b></td>
-		<td class="price-cell">
-			<div class="crypto-price">
-				<span class="currency">Ł</span>
-				<span class="digits">1404.49</span>
-			</div>
-		</td>
-		<td class="change-cell"><span class="trend badge-down">-1.26% ↘</span></td>
+		<td class="pair-cell">BTC/LTC</td>
+		<td class="price-cell">Ł1404.49</td>
+		<td class="change-cell down">-1.26%</td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,14.21 10.65,12.55 16.30,12.55 21.96,7.52 27.61,7.52 33.26,7.52 38.91,5.00 44.57,5.00 50.22,5.00 55.87,5.00 61.52,5.00 67.17,5.00 72.83,5.00 78.48,5.00 84.13,5.00 89.78,5.00 95.43,5.00 101.09,9.21 106.74,11.72 112.39,14.21 118.04,17.53 123.70,14.21 129.35,29.00 135.00,29.00"/>
-		<circle cx="5.00" cy="14.21" r="1.5" fill="#2c3e50"/>
-<circle cx="10.65" cy="12.55" r="1.5" fill="#2c3e50"/>
-<circle cx="16.30" cy="12.55" r="1.5" fill="#2c3e50"/>
-<circle cx="21.96" cy="7.52" r="1.5" fill="#2c3e50"/>
-<circle cx="27.61" cy="7.52" r="1.5" fill="#2c3e50"/>
-<circle cx="33.26" cy="7.52" r="1.5" fill="#2c3e50"/>
-<circle cx="38.91" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="44.57" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="50.22" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="55.87" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="61.52" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="67.17" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="72.83" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="78.48" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="84.13" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="89.78" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="95.43" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="101.09" cy="9.21" r="1.5" fill="#2c3e50"/>
-<circle cx="106.74" cy="11.72" r="1.5" fill="#2c3e50"/>
-<circle cx="112.39" cy="14.21" r="1.5" fill="#2c3e50"/>
-<circle cx="118.04" cy="17.53" r="1.5" fill="#2c3e50"/>
-<circle cx="123.70" cy="14.21" r="1.5" fill="#2c3e50"/>
-<circle cx="129.35" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="135.00" cy="29.00" r="1.5" fill="#2c3e50"/>
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#a9b1d6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,8.14 5.00,7.04 10.00,7.04 15.00,3.68 20.00,3.68 25.00,3.68 30.00,2.00 35.00,2.00 40.00,2.00 45.00,2.00 50.00,2.00 55.00,2.00 60.00,2.00 65.00,2.00 70.00,2.00 75.00,2.00 80.00,2.00 85.00,4.81 90.00,6.48 95.00,8.14 100.00,10.36 105.00,8.14 110.00,18.00 115.00,18.00 120.00,18.00"/>
 	</svg></td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,14.21 10.65,12.55 16.30,12.55 21.96,7.52 27.61,7.52 33.26,7.52 38.91,5.00 44.57,5.00 50.22,5.00 55.87,5.00 61.52,5.00 67.17,5.00 72.83,5.00 78.48,5.00 84.13,5.00 89.78,5.00 95.43,5.00 101.09,9.21 106.74,11.72 112.39,14.21 118.04,17.53 123.70,14.21 129.35,29.00 135.00,29.00"/>
-		
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#787c99" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,8.14 5.00,7.04 10.00,7.04 15.00,3.68 20.00,3.68 25.00,3.68 30.00,2.00 35.00,2.00 40.00,2.00 45.00,2.00 50.00,2.00 55.00,2.00 60.00,2.00 65.00,2.00 70.00,2.00 75.00,2.00 80.00,2.00 85.00,4.81 90.00,6.48 95.00,8.14 100.00,10.36 105.00,8.14 110.00,18.00 115.00,18.00 120.00,18.00"/>
 	</svg></td>
 	</tr>
 	<tr>
-		<td class="pair-cell"><b>LTC / BTC</b></td>
-		<td class="price-cell">
-			<div class="crypto-price">
-				<span class="currency">₿</span>
-				<span class="digits">0.000712</span>
-			</div>
-		</td>
-		<td class="change-cell"><span class="trend badge-up">+1.28% ↗</span></td>
+		<td class="pair-cell">LTC/BTC</td>
+		<td class="price-cell">₿0.000712</td>
+		<td class="change-cell up">+1.28%</td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,19.40 10.65,21.00 16.30,21.00 21.96,25.80 27.61,25.80 33.26,25.80 38.91,29.00 44.57,29.00 50.22,29.00 55.87,29.00 61.52,29.00 67.17,29.00 72.83,29.00 78.48,29.00 84.13,29.00 89.78,29.00 95.43,29.00 101.09,24.20 106.74,22.60 112.39,19.40 118.04,16.20 123.70,19.40 129.35,5.00 135.00,5.00"/>
-		<circle cx="5.00" cy="19.40" r="1.5" fill="#2c3e50"/>
-<circle cx="10.65" cy="21.00" r="1.5" fill="#2c3e50"/>
-<circle cx="16.30" cy="21.00" r="1.5" fill="#2c3e50"/>
-<circle cx="21.96" cy="25.80" r="1.5" fill="#2c3e50"/>
-<circle cx="27.61" cy="25.80" r="1.5" fill="#2c3e50"/>
-<circle cx="33.26" cy="25.80" r="1.5" fill="#2c3e50"/>
-<circle cx="38.91" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="44.57" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="50.22" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="55.87" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="61.52" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="67.17" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="72.83" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="78.48" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="84.13" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="89.78" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="95.43" cy="29.00" r="1.5" fill="#2c3e50"/>
-<circle cx="101.09" cy="24.20" r="1.5" fill="#2c3e50"/>
-<circle cx="106.74" cy="22.60" r="1.5" fill="#2c3e50"/>
-<circle cx="112.39" cy="19.40" r="1.5" fill="#2c3e50"/>
-<circle cx="118.04" cy="16.20" r="1.5" fill="#2c3e50"/>
-<circle cx="123.70" cy="19.40" r="1.5" fill="#2c3e50"/>
-<circle cx="129.35" cy="5.00" r="1.5" fill="#2c3e50"/>
-<circle cx="135.00" cy="5.00" r="1.5" fill="#2c3e50"/>
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#a9b1d6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,11.60 5.00,12.67 10.00,12.67 15.00,15.87 20.00,15.87 25.00,15.87 30.00,18.00 35.00,18.00 40.00,18.00 45.00,18.00 50.00,18.00 55.00,18.00 60.00,18.00 65.00,18.00 70.00,18.00 75.00,18.00 80.00,18.00 85.00,14.80 90.00,13.73 95.00,11.60 100.00,9.47 105.00,11.60 110.00,2.00 115.00,2.00 120.00,2.00"/>
 	</svg></td>
 		<td class="chart-cell">
-	<svg viewBox="0 0 140 34" class="sparkline">
-		<polyline fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="5.00,19.40 10.65,21.00 16.30,21.00 21.96,25.80 27.61,25.80 33.26,25.80 38.91,29.00 44.57,29.00 50.22,29.00 55.87,29.00 61.52,29.00 67.17,29.00 72.83,29.00 78.48,29.00 84.13,29.00 89.78,29.00 95.43,29.00 101.09,24.20 106.74,22.60 112.39,19.40 118.04,16.20 123.70,19.40 129.35,5.00 135.00,5.00"/>
-		
+	<svg viewBox="0 0 120 20" class="sparkline">
+		<polyline fill="none" stroke="#787c99" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0.00,11.60 5.00,12.67 10.00,12.67 15.00,15.87 20.00,15.87 25.00,15.87 30.00,18.00 35.00,18.00 40.00,18.00 45.00,18.00 50.00,18.00 55.00,18.00 60.00,18.00 65.00,18.00 70.00,18.00 75.00,18.00 80.00,18.00 85.00,14.80 90.00,13.73 95.00,11.60 100.00,9.47 105.00,11.60 110.00,2.00 115.00,2.00 120.00,2.00"/>
 	</svg></td>
 	</tr>
 			</tbody>
 		</table>
 	</div>
-	<div class="date">Last update: 2026-06-27 14:14:24 UTC</div>
+	<div class="date">$ last_update: 2026-06-27 14:16:44 UTC</div>
 </body>
 </html>

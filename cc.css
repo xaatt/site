@@ -1,18 +1,15 @@
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #212529; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box; }
-.table-container { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); max-width: 1000px; width: 100%; box-sizing: border-box; border: 1px solid #eff2f5; }
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th { padding: 14px 16px; color: #707a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #eff2f5; }
-td { padding: 16px; border-bottom: 1px solid #eff2f5; font-size: 15px; vertical-align: middle; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: #fcfdfe; }
-.pair-cell { color: #1e2329; font-size: 16px; }
-.price-cell { white-space: nowrap; }
-.crypto-price { display: inline-flex; align-items: flex-start; line-height: 1; }
-.digits { color: #1e2329; font-size: 16px; font-weight: bold; }
-.currency { color: #707a8a; font-size: 11px; font-weight: 500; margin-right: 2px; padding-top: 1px; font-family: sans-serif; }
-.trend { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
-.badge-up { color: #0ecb81; background: rgba(14,203,129,0.1); }
-.badge-down { color: #f6465d; background: rgba(246,70,93,0.1); }
-.badge-neutral { color: #707a8a; background: #f0f2f5; }
-.sparkline { width: 140px; height: 34px; display: block; }
-.date { font-size: 12px; color: #707a8a; margin-top: 24px; text-align: center; }
+body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 30px; display: flex; flex-direction: column; align-items: center; }
+.terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th { padding: 8px 12px; color: #565f89; font-size: 13px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }
+td { padding: 10px 12px; border-bottom: 1px solid #24283b; font-size: 14px; vertical-align: middle; }
+tr:hover td { background: #202231; }
+.pair-cell { color: #7aa2f7; }
+.price-cell { color: #c0caf5; font-weight: 500; }
+.change-cell { font-size: 14px; }
+.up { color: #9ece6a; }
+.down { color: #f7768e; }
+.neutral { color: #a9b1d6; }
+.sparkline { width: 120px; height: 20px; display: block; opacity: 0.8; }
+.none { color: #414868; font-size: 12px; }
+.date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 850px; text-align: left; }
