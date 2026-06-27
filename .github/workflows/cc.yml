@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Unix-style Crypto Table (Go)
+    - name: Run Update and Generate Responsive Unix Crypto Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -179,21 +179,31 @@ jobs:
         	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", "Ł", 2, btcLtcPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", "₿", 6, ltcBtcPrice, nowStr)
 
-        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 30px; display: flex; flex-direction: column; align-items: center; }\n" +
-        		".terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; }\n" +
-        		"table { width: 100%; border-collapse: collapse; margin-top: 10px; }\n" +
-        		"th { padding: 8px 12px; color: #565f89; font-size: 13px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }\n" +
-        		"td { padding: 10px 12px; border-bottom: 1px solid #24283b; font-size: 14px; vertical-align: middle; }\n" +
+        	// Адаптивный CSS без карточек и теней
+        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
+        		".terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; overflow-x: hidden; }\n" +
+        		"table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }\n" +
+        		"th { padding: 8px 6px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }\n" +
+        		"td { padding: 10px 6px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }\n" +
         		"tr:hover td { background: #202231; }\n" +
         		".pair-cell { color: #7aa2f7; }\n" +
         		".price-cell { color: #c0caf5; font-weight: 500; }\n" +
-        		".change-cell { font-size: 14px; }\n" +
+        		".change-cell { font-size: 13px; }\n" +
         		".up { color: #9ece6a; }\n" +
         		".down { color: #f7768e; }\n" +
         		".neutral { color: #a9b1d6; }\n" +
-        		".sparkline { width: 120px; height: 20px; display: block; opacity: 0.8; }\n" +
-        		".none { color: #414868; font-size: 12px; }\n" +
-        		".date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 850px; text-align: left; }"
+        		".sparkline { width: 110px; height: 18px; display: block; opacity: 0.8; }\n" +
+        		".none { color: #414868; font-size: 11px; }\n" +
+        		".date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 850px; text-align: left; padding-left: 6px; }\n" +
+        		"@media (max-width: 600px) {\n" +
+        		"  body { padding: 10px 5px; }\n" +
+        		"  td, th { font-size: 11px; padding: 8px 4px; }\n" +
+        		"  .sparkline { width: 85px; height: 16px; }\n" +
+        		"}\n" +
+        		"@media (max-width: 400px) {\n" +
+        		"  td, th { font-size: 10px; padding: 6px 2px; }\n" +
+        		"  .sparkline { width: 70px; }\n" +
+        		"}"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
 
@@ -212,7 +222,7 @@ jobs:
         				<tr>
         					<th>pair</th>
         					<th>price</th>
-        					<th>change_24h</th>
+        					<th>change</th>
         					<th>chart_24h</th>
         					<th>chart_7d</th>
         				</tr>
