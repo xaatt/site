@@ -1,15 +1,24 @@
-body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 30px; display: flex; flex-direction: column; align-items: center; }
-.terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th { padding: 8px 12px; color: #565f89; font-size: 13px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }
-td { padding: 10px 12px; border-bottom: 1px solid #24283b; font-size: 14px; vertical-align: middle; }
+body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
+.terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; overflow-x: hidden; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }
+th { padding: 8px 6px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }
+td { padding: 10px 6px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }
 tr:hover td { background: #202231; }
 .pair-cell { color: #7aa2f7; }
 .price-cell { color: #c0caf5; font-weight: 500; }
-.change-cell { font-size: 14px; }
+.change-cell { font-size: 13px; }
 .up { color: #9ece6a; }
 .down { color: #f7768e; }
 .neutral { color: #a9b1d6; }
-.sparkline { width: 120px; height: 20px; display: block; opacity: 0.8; }
-.none { color: #414868; font-size: 12px; }
-.date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 850px; text-align: left; }
+.sparkline { width: 110px; height: 18px; display: block; opacity: 0.8; }
+.none { color: #414868; font-size: 11px; }
+.date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 850px; text-align: left; padding-left: 6px; }
+@media (max-width: 600px) {
+  body { padding: 10px 5px; }
+  td, th { font-size: 11px; padding: 8px 4px; }
+  .sparkline { width: 85px; height: 16px; }
+}
+@media (max-width: 400px) {
+  td, th { font-size: 10px; padding: 6px 2px; }
+  .sparkline { width: 70px; }
+}
