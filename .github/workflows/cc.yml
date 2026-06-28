@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Raw Unix Crypto Table (Go)
+    - name: Run Update and Generate Pure Text Crypto Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -53,37 +53,6 @@ jobs:
         	}
 
         	return strconv.ParseFloat(cbResp.Data.Amount, 64)
-        }
-
-        func generateSVG(points []Point, strokeColor string) string {
-        	if len(points) < 2 {
-        		return "<span class='none'>no data</span>"
-        	}
-
-        	svgWidth := 120
-        	svgHeight := 20
-        	minP := points[0].Price
-        	maxP := points[0].Price
-
-        	for _, pt := range points {
-        		if pt.Price < minP { minP = pt.Price }
-        		if pt.Price > maxP { maxP = pt.Price }
-        	}
-
-        	rng := maxP - minP
-        	if rng == 0 { rng = 1.0 }
-
-        	var pointsCoords []string
-        	for i, pt := range points {
-        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth)
-        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-4) + 2)
-        		pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
-        	}
-
-        	return fmt.Sprintf(`
-        	<svg viewBox="0 0 %d %d" class="sparkline">
-        		<polyline fill="none" stroke="%s" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
-        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "))
         }
 
         func processCoinRow(symbol, historyFile string, precision int, price float64, nowStr string) string {
@@ -132,26 +101,39 @@ jobs:
         		}
         	}
 
-        	changePercent := 0.0
-        	trendClass := "neutral"
-        	changeText := "0.00%"
-
+        	// Расчет 24ч изменений
+        	change24hText := "0.00%"
+        	class24h := "neutral"
         	if len(points24h) > 1 {
         		oldPrice := points24h[0].Price
         		if oldPrice > 0 {
-        			changePercent = ((price - oldPrice) / oldPrice) * 100
-        		}
-        		if changePercent > 0 {
-        			trendClass = "up"
-        			changeText = fmt.Sprintf("+%.2f%%", changePercent)
-        		} else if changePercent < 0 {
-        			trendClass = "down"
-        			changeText = fmt.Sprintf("%.2f%%", changePercent)
+        			diff := ((price - oldPrice) / oldPrice) * 100
+        			if diff > 0 {
+        				change24hText = fmt.Sprintf("+%.2f%%", diff)
+        				class24h = "up"
+        			} else if diff < 0 {
+        				change24hText = fmt.Sprintf("%.2f%%", diff)
+        				class24h = "down"
+        			}
         		}
         	}
 
-        	svg24h := generateSVG(points24h, "#a9b1d6")
-        	svg7d := generateSVG(points7d, "#787c99")
+        	// Расчет 7д изменений
+        	change7dText := "0.00%"
+        	class7d := "neutral"
+        	if len(points7d) > 1 {
+        		oldPrice7d := points7d[0].Price
+        		if oldPrice7d > 0 {
+        			diff7d := ((price - oldPrice7d) / oldPrice7d) * 100
+        			if diff7d > 0 {
+        				change7dText = fmt.Sprintf("+%.2f%%", diff7d)
+        				class7d = "up"
+        			} else if diff7d < 0 {
+        				change7dText = fmt.Sprintf("%.2f%%", diff7d)
+        				class7d = "down"
+        			}
+        		}
+        	}
 
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
@@ -161,9 +143,8 @@ jobs:
         		<td class="pair-cell">%s</td>
         		<td class="price-cell">%s</td>
         		<td class="change-cell %s">%s</td>
-        		<td class="chart-cell">%s</td>
-        		<td class="chart-cell">%s</td>
-        	</tr>`, symbol, mainPriceStr, trendClass, changeText, svg24h, svg7d)
+        		<td class="change-cell %s">%s</td>
+        	</tr>`, symbol, mainPriceStr, class24h, change24hText, class7d, change7dText)
         }
 
         func main() {
@@ -179,11 +160,12 @@ jobs:
         	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", 2, btcLtcPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
+        	// Чистый текстовый CSS
         	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
-        		".terminal-container { width: 100%; max-width: 850px; box-sizing: border-box; overflow-x: hidden; }\n" +
+        		".terminal-container { width: 100%; max-width: 650px; box-sizing: border-box; overflow-x: hidden; }\n" +
         		"table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }\n" +
-        		"th { padding: 8px 6px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }\n" +
-        		"td { padding: 10px 6px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }\n" +
+        		"th { padding: 8px 12px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }\n" +
+        		"td { padding: 10px 12px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }\n" +
         		"tr:hover td { background: #202231; }\n" +
         		".pair-cell { color: #7aa2f7; }\n" +
         		".price-cell { color: #c0caf5; font-weight: 500; }\n" +
@@ -191,17 +173,10 @@ jobs:
         		".up { color: #9ece6a; }\n" +
         		".down { color: #f7768e; }\n" +
         		".neutral { color: #a9b1d6; }\n" +
-        		".sparkline { width: 110px; height: 18px; display: block; opacity: 0.8; }\n" +
-        		".none { color: #414868; font-size: 11px; }\n" +
-        		".date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 850px; text-align: left; padding-left: 6px; }\n" +
-        		"@media (max-width: 600px) {\n" +
+        		".date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 650px; text-align: left; padding-left: 12px; }\n" +
+        		"@media (max-width: 500px) {\n" +
         		"  body { padding: 10px 5px; }\n" +
-        		"  td, th { font-size: 11px; padding: 8px 4px; }\n" +
-        		"  .sparkline { width: 85px; height: 16px; }\n" +
-        		"}\n" +
-        		"@media (max-width: 400px) {\n" +
-        		"  td, th { font-size: 10px; padding: 6px 2px; }\n" +
-        		"  .sparkline { width: 70px; }\n" +
+        		"  td, th { font-size: 11px; padding: 8px 6px; }\n" +
         		"}"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
@@ -221,9 +196,8 @@ jobs:
         				<tr>
         					<th>pair</th>
         					<th>price</th>
-        					<th>change</th>
-        					<th>chart_24h</th>
-        					<th>chart_7d</th>
+        					<th>change_24h</th>
+        					<th>change_7d</th>
         				</tr>
         			</thead>
         			<tbody>` + btcUsdRow + ltcUsdRow + btcLtcRow + ltcBtcRow + `
