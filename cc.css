@@ -5,7 +5,7 @@ th { padding: 8px 12px; color: #cccccc; font-size: 14px; font-weight: normal; te
 th:first-child { text-align: left; padding-left: 0; }
 th:last-child { padding-right: 0; }
 td { padding: 10px 12px; border-bottom: 1px solid #111111; font-size: 16px; text-align: right; white-space: nowrap; }
-td:first-child { text-align: left; padding-left: 0; color: #7cd924; font-weight: bold; }
+td:first-child { text-align: left; padding-left: 0; color: #ffffff; font-weight: bold; }
 td:last-child { padding-right: 0; }
 .price-cell { color: #7cd924; }
 .change-cell { font-weight: bold; }
