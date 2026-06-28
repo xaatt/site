@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Smart High-Contrast Table (Go)
+    - name: Run Update and Generate Pure Retro Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -159,31 +159,23 @@ jobs:
         	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", 2, btcLtcPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
-        	// Вносим ТОЛЬКО новые яркие контрастные цвета. Сетка полностью из image_33649b
-        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;  color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }\n" +
-        		".terminal-container { width: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }\n" +
+        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #000000; color: #7cd924; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
+        		".terminal-container { width: auto; max-width: 100%; box-sizing: border-box; }\n" +
         		"table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }\n" +
-        		"thead tr {  }\n" +
-        		"th { padding: 10px 20px; color: #cccccc; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 2px solid #414868; text-align: right; }\n" +
-        		"th:first-child { text-align: left; padding-left: 5px; }\n" +
-        		"th:last-child { padding-right: 5px; }\n" +
-        		"td { padding: 14px 20px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }\n" +
-        		"td:first-child { text-align: left; padding-left: 5px; color: #7aa2f7; font-weight: bold; }\n" +
-        		"td:last-child { padding-right: 5px; }\n" +
-        		".price-cell { color: #cccccc; font-weight: 500; }\n" +
+        		"th { padding: 8px 12px; color: #cccccc; font-size: 14px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #7cd924; text-align: right; }\n" +
+        		"th:first-child { text-align: left; padding-left: 0; }\n" +
+        		"th:last-child { padding-right: 0; }\n" +
+        		"td { padding: 10px 12px; border-bottom: 1px solid #111111; font-size: 16px; text-align: right; white-space: nowrap; }\n" +
+        		"td:first-child { text-align: left; padding-left: 0; color: #7cd924; font-weight: bold; }\n" +
+        		"td:last-child { padding-right: 0; }\n" +
+        		".price-cell { color: #7cd924; }\n" +
         		".change-cell { font-weight: bold; }\n" +
-        		".up { color: #9ece6a; }\n" +
-        		".down { color: #f7768e; }\n" +
-        		".neutral { color: #cccccc; }\n" +
-        		".date { font-size: 13px; color: #a9b1d6; margin-top: 30px; font-style: italic; text-align: left; padding-left: 5px; }\n" +
-        		"@media (max-width: 700px) {\n" +
+        		".up { color: #4cd964; }\n" +
+        		".down { color: #ff3333; }\n" +
+        		".neutral { color: #7cd924; }\n" +
+        		".date { font-size: 12px; color: #cccccc; margin-top: 20px; font-style: italic; text-align: left; }\n" +
+        		"@media (max-width: 600px) {\n" +
         		"  .hide-mobile { display: none !important; }\n" +
-        		"}\n" +
-        		"@media (max-width: 500px) {\n" +
-        		"  body { padding: 20px 8px; }\n" +
-        		"  th { font-size: 13.5px; padding: 8px 5px; }\n" +
-        		"  td { font-size: 14.5px; padding: 12px 5px; }\n" +
-        		"  .date { font-size: 11px; }\n" +
         		"}"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
