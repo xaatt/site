@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Combo Crypto Table (Go)
+    - name: Run Update and Generate Pure Text Metrics Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -55,37 +55,6 @@ jobs:
         	return strconv.ParseFloat(cbResp.Data.Amount, 64)
         }
 
-        func generateSVG(points []Point, strokeColor string) string {
-        	if len(points) < 2 {
-        		return "<span class='none'>no data</span>"
-        	}
-
-        	svgWidth := 100
-        	svgHeight := 20
-        	minP := points[0].Price
-        	maxP := points[0].Price
-
-        	for _, pt := range points {
-        		if pt.Price < minP { minP = pt.Price }
-        		if pt.Price > maxP { maxP = pt.Price }
-        	}
-
-        	rng := maxP - minP
-        	if rng == 0 { rng = 1.0 }
-
-        	var pointsCoords []string
-        	for i, pt := range points {
-        		x := (float64(i) / float64(len(points)-1)) * float64(svgWidth)
-        		y := float64(svgHeight) - (((pt.Price - minP) / rng) * float64(svgHeight-4) + 2)
-        		pointsCoords = append(pointsCoords, fmt.Sprintf("%.2f,%.2f", x, y))
-        	}
-
-        	return fmt.Sprintf(`
-        	<svg viewBox="0 0 %d %d" class="sparkline">
-        		<polyline fill="none" stroke="%s" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="%s"/>
-        	</svg>`, svgWidth, svgHeight, strokeColor, strings.Join(pointsCoords, " "))
-        }
-
         func processCoinRow(symbol, historyFile string, precision int, price float64, nowStr string) string {
         	var fileExists bool
         	if _, err := os.Stat(historyFile); err == nil {
@@ -103,7 +72,7 @@ jobs:
 
         	data, err := os.ReadFile(historyFile)
         	if err != nil {
-        		return "<tr><td colspan='7'>err</td></tr>"
+        		return "<tr><td colspan='6'>err</td></tr>"
         	}
 
         	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
@@ -141,7 +110,6 @@ jobs:
         		}
         	}
 
-        	// Функция расчета процентов для чистоты кода
         	calcDiff := func(pts []Point) (string, string) {
         		if len(pts) < 2 {
         			return "0.00%", "neutral"
@@ -160,11 +128,9 @@ jobs:
         	}
 
         	change24hText, class24h := calcDiff(points24h)
+        	change7dText, class7d := calcDiff(points7d)
         	change30dText, class30d := calcDiff(points30d)
         	changeYearText, classYear := calcDiff(pointsYear)
-
-        	svg24h := generateSVG(points24h, "#a9b1d6")
-        	svg7d := generateSVG(points7d, "#787c99")
 
         	priceLabelFormat := fmt.Sprintf("%%.%df", precision)
         	mainPriceStr := fmt.Sprintf(priceLabelFormat, price)
@@ -176,9 +142,8 @@ jobs:
         		<td class="change-cell %s">%s</td>
         		<td class="change-cell %s">%s</td>
         		<td class="change-cell %s">%s</td>
-        		<td class="chart-cell">%s</td>
-        		<td class="chart-cell">%s</td>
-        	</tr>`, symbol, mainPriceStr, class24h, change24hText, class30d, change30dText, classYear, changeYearText, svg24h, svg7d)
+        		<td class="change-cell %s">%s</td>
+        	</tr>`, symbol, mainPriceStr, class24h, change24hText, class7d, change7dText, class30d, change30dText, classYear, changeYearText)
         }
 
         func main() {
@@ -194,12 +159,12 @@ jobs:
         	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", 2, btcLtcPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
-        	// Оптимизированный адаптивный CSS под 7 колонок
+        	// Чистый моноширинный CSS без картинок
         	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
-        		".terminal-container { width: 100%; max-width: 950px; box-sizing: border-box; overflow-x: hidden; }\n" +
+        		".terminal-container { width: 100%; max-width: 750px; box-sizing: border-box; overflow-x: hidden; }\n" +
         		"table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }\n" +
-        		"th { padding: 8px 10px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }\n" +
-        		"td { padding: 10px 10px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }\n" +
+        		"th { padding: 8px 12px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }\n" +
+        		"td { padding: 10px 12px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }\n" +
         		"tr:hover td { background: #202231; }\n" +
         		".pair-cell { color: #7aa2f7; }\n" +
         		".price-cell { color: #c0caf5; font-weight: 500; }\n" +
@@ -207,17 +172,13 @@ jobs:
         		".up { color: #9ece6a; }\n" +
         		".down { color: #f7768e; }\n" +
         		".neutral { color: #a9b1d6; }\n" +
-        		".sparkline { width: 100px; height: 18px; display: block; opacity: 0.8; }\n" +
-        		".none { color: #414868; font-size: 11px; }\n" +
-        		".date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 950px; text-align: left; padding-left: 10px; }\n" +
-        		"@media (max-width: 768px) {\n" +
+        		".date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 750px; text-align: left; padding-left: 12px; }\n" +
+        		"@media (max-width: 650px) {\n" +
         		"  body { padding: 10px 5px; }\n" +
-        		"  td, th { font-size: 11px; padding: 8px 5px; }\n" +
-        		"  .sparkline { width: 75px; height: 16px; }\n" +
+        		"  td, th { font-size: 11px; padding: 8px 6px; }\n" +
         		"}\n" +
-        		"@media (max-width: 550px) {\n" +
+        		"@media (max-width: 450px) {\n" +
         		"  td, th { font-size: 10px; padding: 6px 3px; }\n" +
-        		"  .sparkline { width: 60px; }\n" +
         		"}"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
@@ -238,10 +199,9 @@ jobs:
         					<th>pair</th>
         					<th>price</th>
         					<th>change_24h</th>
+        					<th>change_7d</th>
         					<th>change_30d</th>
         					<th>change_year</th>
-        					<th>chart_24h</th>
-        					<th>chart_7d</th>
         				</tr>
         			</thead>
         			<tbody>` + btcUsdRow + ltcUsdRow + btcLtcRow + ltcBtcRow + `
