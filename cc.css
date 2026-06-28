@@ -1,25 +1,18 @@
-body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
-.terminal-container { width: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #000000; color: #7cd924; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
+.terminal-container { width: auto; max-width: 100%; box-sizing: border-box; }
 table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }
-thead tr { background: #24283b; }
-th { padding: 10px 20px; color: #ffffff; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 2px solid #414868; text-align: right; }
-th:first-child { text-align: left; padding-left: 5px; }
-th:last-child { padding-right: 5px; }
-td { padding: 14px 20px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }
-td:first-child { text-align: left; padding-left: 5px; color: #7aa2f7; font-weight: bold; }
-td:last-child { padding-right: 5px; }
-.price-cell { color: #ffffff; font-weight: 500; }
+th { padding: 8px 12px; color: #cccccc; font-size: 14px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #7cd924; text-align: right; }
+th:first-child { text-align: left; padding-left: 0; }
+th:last-child { padding-right: 0; }
+td { padding: 10px 12px; border-bottom: 1px solid #111111; font-size: 16px; text-align: right; white-space: nowrap; }
+td:first-child { text-align: left; padding-left: 0; color: #7cd924; font-weight: bold; }
+td:last-child { padding-right: 0; }
+.price-cell { color: #7cd924; }
 .change-cell { font-weight: bold; }
-.up { color: #9ece6a; }
-.down { color: #f7768e; }
-.neutral { color: #ffffff; }
-.date { font-size: 13px; color: #a9b1d6; margin-top: 30px; font-style: italic; text-align: left; padding-left: 5px; }
-@media (max-width: 700px) {
+.up { color: #4cd964; }
+.down { color: #ff3333; }
+.neutral { color: #7cd924; }
+.date { font-size: 12px; color: #cccccc; margin-top: 20px; font-style: italic; text-align: left; }
+@media (max-width: 600px) {
   .hide-mobile { display: none !important; }
-}
-@media (max-width: 500px) {
-  body { padding: 20px 8px; }
-  th { font-size: 13.5px; padding: 8px 5px; }
-  td { font-size: 14.5px; padding: 12px 5px; }
-  .date { font-size: 11px; }
 }
