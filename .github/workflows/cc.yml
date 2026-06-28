@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Compact Large Metrics Table (Go)
+    - name: Run Update and Generate No-Scroll Metrics Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -159,14 +159,14 @@ jobs:
         	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", 2, btcLtcPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
-        	// Компактный CSS с крупными шрифтами без растягивания колонок
-        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
-        		".terminal-container { width: auto; max-width: 100%; box-sizing: border-box; }\n" +
-        		"table { border-collapse: collapse; margin-top: 10px; width: auto; }\n" +
-        		"th { padding: 10px 20px; color: #565f89; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: right; }\n" +
+        	// CSS с жестким подавлением горизонтального скролла
+        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }\n" +
+        		".terminal-container { width: auto; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }\n" +
+        		"table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }\n" +
+        		"th { padding: 10px 16px; color: #565f89; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: right; }\n" +
         		"th:first-child { text-align: left; padding-left: 5px; }\n" +
         		"th:last-child { padding-right: 5px; }\n" +
-        		"td { padding: 14px 20px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }\n" +
+        		"td { padding: 14px 16px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }\n" +
         		"td:first-child { text-align: left; padding-left: 5px; }\n" +
         		"td:last-child { padding-right: 5px; }\n" +
         		".pair-cell { color: #7aa2f7; font-weight: bold; }\n" +
@@ -177,13 +177,14 @@ jobs:
         		".neutral { color: #a9b1d6; }\n" +
         		".date { font-size: 13px; color: #565f89; margin-top: 35px; font-style: italic; align-self: center; text-align: left; width: 100%; padding-left: 5px; }\n" +
         		"@media (max-width: 650px) {\n" +
-        		"  body { padding: 20px 10px; }\n" +
-        		"  th { font-size: 13px; padding: 8px 12px; }\n" +
-        		"  td { font-size: 15px; padding: 12px 12px; }\n" +
+        		"  body { padding: 20px 8px; }\n" +
+        		"  th { font-size: 13px; padding: 8px 10px; }\n" +
+        		"  td { font-size: 14px; padding: 12px 10px; }\n" +
         		"}\n" +
         		"@media (max-width: 480px) {\n" +
-        		"  th { font-size: 12px; padding: 6px 8px; }\n" +
-        		"  td { font-size: 13px; padding: 10px 8px; }\n" +
+        		"  th { font-size: 11px; padding: 6px 6px; }\n" +
+        		"  td { font-size: 12px; padding: 10px 6px; }\n" +
+        		"  .date { font-size: 11px; }\n" +
         		"}"
 
         	os.WriteFile("cc.css", []byte(cssContent), 0644)
