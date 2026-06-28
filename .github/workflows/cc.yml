@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Run Update and Generate Smart Responsive Table (Go)
+    - name: Run Update and Generate Pixel Perfect Responsive Table (Go)
       run: |
         cat << 'EOF' > main.go
         package main
@@ -159,8 +159,8 @@ jobs:
         	btcLtcRow := processCoinRow("BTC/LTC", "history_btc_ltc.csv", 2, btcLtcPrice, nowStr)
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
-        	// Умный CSS: убираем лишние колонки на мобилке для предотвращения скролла
-        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }\n" +
+        	// Финальный отполированный CSS
+        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }\n" +
         		".terminal-container { width: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }\n" +
         		"table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }\n" +
         		"th { padding: 10px 20px; color: #565f89; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: right; }\n" +
@@ -176,15 +176,13 @@ jobs:
         		".down { color: #f7768e; }\n" +
         		".neutral { color: #a9b1d6; }\n" +
         		".date { font-size: 13px; color: #565f89; margin-top: 30px; font-style: italic; text-align: left; padding-left: 5px; }\n" +
-        		"@media (max-width: 650px) {\n" +
-        		"  body { padding: 20px 10px; }\n" +
-        		"  th { font-size: 14px; padding: 8px 12px; }\n" +
-        		"  td { font-size: 16px; padding: 12px 12px; }\n" +
-        		"  .hide-mobile { display: none; }\n" +
+        		"@media (max-width: 700px) {\n" +
+        		"  .hide-mobile { display: none !important; }\n" +
         		"}\n" +
-        		"@media (max-width: 400px) {\n" +
-        		"  th { font-size: 13px; padding: 8px 8px; }\n" +
-        		"  td { font-size: 14px; padding: 12px 8px; }\n" +
+        		"@media (max-width: 500px) {\n" +
+        		"  body { padding: 20px 10px; }\n" +
+        		"  th { font-size: 14px; padding: 8px 6px; }\n" +
+        		"  td { font-size: 15px; padding: 12px 6px; }\n" +
         		"  .date { font-size: 11px; }\n" +
         		"}"
 
