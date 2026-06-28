@@ -1,8 +1,8 @@
 body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
-.terminal-container { width: 100%; max-width: 650px; box-sizing: border-box; overflow-x: hidden; }
+.terminal-container { width: 100%; max-width: 950px; box-sizing: border-box; overflow-x: hidden; }
 table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }
-th { padding: 8px 12px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }
-td { padding: 10px 12px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }
+th { padding: 8px 10px; color: #565f89; font-size: 12px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: left; }
+td { padding: 10px 10px; border-bottom: 1px solid #24283b; font-size: 13px; vertical-align: middle; white-space: nowrap; }
 tr:hover td { background: #202231; }
 .pair-cell { color: #7aa2f7; }
 .price-cell { color: #c0caf5; font-weight: 500; }
@@ -10,8 +10,15 @@ tr:hover td { background: #202231; }
 .up { color: #9ece6a; }
 .down { color: #f7768e; }
 .neutral { color: #a9b1d6; }
-.date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 650px; text-align: left; padding-left: 12px; }
-@media (max-width: 500px) {
+.sparkline { width: 100px; height: 18px; display: block; opacity: 0.8; }
+.none { color: #414868; font-size: 11px; }
+.date { font-size: 11px; color: #565f89; margin-top: 20px; font-style: italic; width: 100%; max-width: 950px; text-align: left; padding-left: 10px; }
+@media (max-width: 768px) {
   body { padding: 10px 5px; }
-  td, th { font-size: 11px; padding: 8px 6px; }
+  td, th { font-size: 11px; padding: 8px 5px; }
+  .sparkline { width: 75px; height: 16px; }
+}
+@media (max-width: 550px) {
+  td, th { font-size: 10px; padding: 6px 3px; }
+  .sparkline { width: 60px; }
 }
