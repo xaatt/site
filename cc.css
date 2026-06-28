@@ -1,10 +1,10 @@
 body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
-.terminal-container { width: 100%; max-width: 650px; box-sizing: border-box; display: flex; flex-direction: column; }
-table { border-collapse: collapse; margin-top: 10px; width: 100%; max-width: 650px; }
-th { padding: 10px 14px; color: #565f89; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: right; }
+.terminal-container { width: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }
+th { padding: 10px 20px; color: #565f89; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #414868; text-align: right; }
 th:first-child { text-align: left; padding-left: 5px; }
 th:last-child { padding-right: 5px; }
-td { padding: 14px 14px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }
+td { padding: 14px 20px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }
 td:first-child { text-align: left; padding-left: 5px; }
 td:last-child { padding-right: 5px; }
 .pair-cell { color: #7aa2f7; font-weight: bold; }
@@ -14,14 +14,12 @@ td:last-child { padding-right: 5px; }
 .down { color: #f7768e; }
 .neutral { color: #a9b1d6; }
 .date { font-size: 13px; color: #565f89; margin-top: 30px; font-style: italic; text-align: left; padding-left: 5px; }
-@media (max-width: 680px) {
-  body { padding: 20px 10px; }
-  .terminal-container, table { width: 100%; max-width: 100%; }
-  th, td { padding: 12px 8px; font-size: 15px; }
+@media (max-width: 700px) {
   .hide-mobile { display: none !important; }
 }
-@media (max-width: 415px) {
-  th { font-size: 13px; padding: 10px 6px; }
-  td { font-size: 14px; padding: 12px 6px; }
+@media (max-width: 500px) {
+  body { padding: 20px 8px; }
+  th { font-size: 13.5px; padding: 8px 5px; }
+  td { font-size: 14.5px; padding: 12px 5px; }
   .date { font-size: 11px; }
 }
