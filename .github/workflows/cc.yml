@@ -170,7 +170,7 @@ jobs:
         		"td:last-child { padding-right: 0; }\n" +
         		".price-cell { color: #7cd924; }\n" +
         		".change-cell { font-weight: bold; }\n" +
-        		".up { color: #4cd964; }\n" +
+        		".up { color: #00ff66; }\n" +
         		".down { color: #ff3333; }\n" +
         		".neutral { color: #7cd924; }\n" +
         		".date { font-size: 12px; color: #cccccc; margin-top: 20px; font-style: italic; text-align: left; }\n" +
