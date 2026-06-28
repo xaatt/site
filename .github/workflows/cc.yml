@@ -160,21 +160,21 @@ jobs:
         	ltcBtcRow := processCoinRow("LTC/BTC", "history_ltc_btc.csv", 6, ltcBtcPrice, nowStr)
 
         	// Вносим ТОЛЬКО новые яркие контрастные цвета. Сетка полностью из image_33649b
-        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #1a1b26; color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }\n" +
+        	cssContent := "body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;  color: #a9b1d6; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }\n" +
         		".terminal-container { width: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }\n" +
         		"table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }\n" +
-        		"thead tr { background: #24283b; }\n" +
-        		"th { padding: 10px 20px; color: #ffffff; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 2px solid #414868; text-align: right; }\n" +
+        		"thead tr {  }\n" +
+        		"th { padding: 10px 20px; color: #cccccc; font-size: 15px; font-weight: normal; text-transform: lowercase; border-bottom: 2px solid #414868; text-align: right; }\n" +
         		"th:first-child { text-align: left; padding-left: 5px; }\n" +
         		"th:last-child { padding-right: 5px; }\n" +
         		"td { padding: 14px 20px; border-bottom: 1px solid #24283b; font-size: 17px; vertical-align: middle; white-space: nowrap; text-align: right; }\n" +
         		"td:first-child { text-align: left; padding-left: 5px; color: #7aa2f7; font-weight: bold; }\n" +
         		"td:last-child { padding-right: 5px; }\n" +
-        		".price-cell { color: #ffffff; font-weight: 500; }\n" +
+        		".price-cell { color: #cccccc; font-weight: 500; }\n" +
         		".change-cell { font-weight: bold; }\n" +
         		".up { color: #9ece6a; }\n" +
         		".down { color: #f7768e; }\n" +
-        		".neutral { color: #ffffff; }\n" +
+        		".neutral { color: #cccccc; }\n" +
         		".date { font-size: 13px; color: #a9b1d6; margin-top: 30px; font-style: italic; text-align: left; padding-left: 5px; }\n" +
         		"@media (max-width: 700px) {\n" +
         		"  .hide-mobile { display: none !important; }\n" +
