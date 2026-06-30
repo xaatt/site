@@ -167,9 +167,9 @@ jobs:
         		"th:first-child { text-align: left; padding-left: 0; }\n" +
         		"th:last-child { padding-right: 0; }\n" +
         		"td { padding: 10px 12px; border-bottom: 1px solid #111111; font-size: 16px; text-align: right; white-space: nowrap; }\n" +
-        		"td:first-child { text-align: left; padding-left: 0; color: #7cd924; font-weight: bold; }\n" +
+        		"td:first-child { text-align: left; padding-left: 0; color: #00f5ff; font-weight: bold; }\n" +
         		"td:last-child { padding-right: 0; }\n" +
-        		".price-cell { color: #aaaaaa; }\n" +
+        		".price-cell { color: #ffffff; }\n" +
         		".change-cell { font-weight: bold; }\n" +
         		".up { color: #00ff66; }\n" +
         		".down { color: #ff3333; }\n" +
