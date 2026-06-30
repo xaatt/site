@@ -1,17 +1,17 @@
-body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #000000; color: #7cd924; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
+body { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; background: #000000; color: #aaaaaa; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
 .terminal-container { width: auto; max-width: 100%; box-sizing: border-box; display: block; }
 table { border-collapse: collapse; margin-top: 10px; width: auto; max-width: 100%; }
 th { padding: 8px 12px; color: #aaaaaa; font-size: 14px; font-weight: normal; text-transform: lowercase; border-bottom: 1px dashed #aaaaaa; text-align: right; }
 th:first-child { text-align: left; padding-left: 0; }
 th:last-child { padding-right: 0; }
 td { padding: 10px 12px; border-bottom: 1px solid #111111; font-size: 16px; text-align: right; white-space: nowrap; }
-td:first-child { text-align: left; padding-left: 0; color: #ffffff; font-weight: bold; }
+td:first-child { text-align: left; padding-left: 0; color: #00f5ff; font-weight: bold; }
 td:last-child { padding-right: 0; }
-.price-cell { color: #7cd924; }
+.price-cell { color: #ffffff; }
 .change-cell { font-weight: bold; }
 .up { color: #00ff66; }
 .down { color: #ff3333; }
-.neutral { color: #7cd924; }
+.neutral { color: #aaaaaa; }
 .date { font-size: 12px; color: #aaaaaa; margin-top: 20px; font-style: italic; text-align: left; width: 100%; padding-left: 0; }
 @media (max-width: 600px) {
   .hide-mobile { display: none !important; }
