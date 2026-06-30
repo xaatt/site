@@ -187,7 +187,7 @@ jobs:
         <head>
         	<meta charset="UTF-8">
         	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        	<title>crypto_terminal</title>
+        	<title>Live Crypto Terminal | BTC & LTC Tracker</title><meta name="description" content="Minimalist real-time cryptocurrency dashboard tracking BTC and LTC market updates."><meta name="keywords" content="crypto, bitcoin, litecoin, terminal, tracker"><meta property="og:title" content="Crypto Terminal"><meta property="og:description" content="Real-time crypto updates.">
         	<link rel="stylesheet" href="cc.css">
         </head>
         <body>
